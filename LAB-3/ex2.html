@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5 Multimedia Player</title>
+    <style>
+        /* Advanced CSS for Multimedia Layout */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .media-container {
+            background: #2d2d2d;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+
+        video {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .time-display {
+            font-family: monospace;
+            color: #00d1b2;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            display: block;
+        }
+
+        h2 {
+            border-bottom: 2px solid #444;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="media-container">
+        <h2>Video Showcase</h2>
+        <video id="myVideo" controls>
+            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="time-display">Current Time: <span id="videoTime">0:00</span></div>
+    </div>
+
+    <div class="media-container">
+        <h2>Audio Experience</h2>
+        <audio id="myAudio" controls>
+            <source src="https://www.w3schools.com/html/horse.ogg" type="audio/ogg">
+            <source src="https://www.w3schools.com/html/horse.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <div class="time-display">Current Time: <span id="audioTime">0:00</span></div>
+    </div>
+
+    <script>
+        // Function to format seconds into M:SS
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        // Logic for Video Time Display
+        const video = document.getElementById('myVideo');
+        const videoDisplay = document.getElementById('videoTime');
+
+        video.addEventListener('timeupdate', () => {
+            videoDisplay.innerText = formatTime(video.currentTime);
+        });
+
+        // Logic for Audio Time Display
+        const audio = document.getElementById('myAudio');
+        const audioDisplay = document.getElementById('audioTime');
+
+        audio.addEventListener('timeupdate', () => {
+            audioDisplay.innerText = formatTime(audio.currentTime);
+        });
+    </script>
+
+</body>
+</html>

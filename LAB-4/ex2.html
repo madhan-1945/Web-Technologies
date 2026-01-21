@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartCart | Intelligent Shopping</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #818cf8;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            overflow: hidden; /* Prevent body scroll, use inner scroll */
+        }
+
+        /* --- Layout --- */
+        .wrapper {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Product Grid Section */
+        .store-section {
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+        .header h1 { font-size: 2rem; font-weight: 700; color: #111827; }
+        .header p { color: #6b7280; }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
+        }
+
+        /* Product Card */
+        .product-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .p-cat {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--secondary);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .p-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
+        .p-price { font-size: 1.25rem; color: var(--primary); font-weight: 600; }
+        
+        .btn-add {
+            margin-top: 15px;
+            background: var(--text);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn-add:hover { background: var(--primary); }
+
+        /* --- Cart Sidebar --- */
+        .cart-section {
+            background: white;
+            padding: 40px;
+            box-shadow: -4px 0 15px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .cart-header { font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .cart-count { background: var(--danger); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 10px; /* Space for scrollbar */
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #e5e7eb;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn { from {opacity: 0; transform: translateX(20px);} to {opacity: 1; transform: translateX(0);} }
+
+        .item-info h4 { font-size: 0.95rem; font-weight: 600; }
+        .item-info span { font-size: 0.85rem; color: #6b7280; }
+        
+        .item-controls { display: flex; align-items: center; gap: 10px; }
+        .qty-btn {
+            background: #f3f4f6; border: none; width: 25px; height: 25px;
+            border-radius: 5px; cursor: pointer; color: #374151;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .qty-btn:hover { background: #e5e7eb; }
+
+        /* Totals & Discounts */
+        .summary-box {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; color: #4b5563; }
+        .summary-row.total { font-size: 1.2rem; font-weight: 700; color: #111827; border-top: 1px solid #e5e7eb; padding-top: 10px; margin-top: 10px; }
+        .discount-text { color: var(--success); font-size: 0.85rem; }
+
+        /* Coupon Input */
+        .coupon-box { display: flex; gap: 10px; margin-top: 15px; }
+        .coupon-input {
+            flex: 1; padding: 8px 12px; border: 1px solid #d1d5db;
+            border-radius: 6px; outline: none; text-transform: uppercase;
+        }
+        .coupon-btn { background: var(--primary); color: white; border: none; padding: 0 15px; border-radius: 6px; cursor: pointer; }
+
+        /* Empty State */
+        .empty-cart { text-align: center; color: #9ca3af; margin-top: 50px; }
+        .empty-cart i { font-size: 3rem; margin-bottom: 10px; display: block; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .wrapper { grid-template-columns: 1fr; overflow-y: scroll; }
+            body { height: auto; display: block; overflow: auto; }
+            .cart-section { height: auto; border-top: 1px solid #e5e7eb; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <main class="store-section">
+            <header class="header">
+                <h1>SmartCart <span style="color:var(--primary)">&#128722</span></h1>
+                <p>Add items to test dynamic discount logic.</p>
+                <div style="margin-top: 15px; padding: 10px; background: #e0e7ff; border-radius: 8px; display: inline-block;">
+                    <label style="font-size: 0.9rem; margin-right: 10px;">
+                        <input type="checkbox" id="happyHourCheck" onchange="renderCart()"> 🌙 Simulate Happy Hour (After 6PM)
+                    </label>
+                </div>
+            </header>
+
+            <div id="product-grid" class="product-grid">
+                </div>
+        </main>
+
+        <aside class="cart-section">
+            <div class="cart-header">
+                Your Cart <span id="cart-count" class="cart-count">0</span>
+            </div>
+
+            <div id="cart-items" class="cart-items">
+                </div>
+
+            <div class="summary-box">
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span id="subtotal">$0.00</span>
+                </div>
+                <div id="discount-rows"></div>
+
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span id="final-total">$0.00</span>
+                </div>
+
+                <div class="coupon-box">
+                    <input type="text" id="coupon-code" class="coupon-input" placeholder="CODE (e.g. SAVE10)">
+                    <button class="coupon-btn" onclick="applyCoupon()">Apply</button>
+                </div>
+                <small id="coupon-msg" style="display: block; margin-top: 5px; font-size: 0.8rem; min-height: 1.2em;"></small>
+            </div>
+        </aside>
+    </div>
+
+<script>
+    // --- Data Configuration ---
+    const products = [
+        { id: 1, name: "Wireless Headphones", price: 150.00, category: "electronics" },
+        { id: 2, name: "Running Shoes", price: 85.00, category: "fashion" },
+        { id: 3, name: "Smart Watch", price: 200.00, category: "electronics" },
+        { id: 4, name: "Cotton Hoodie", price: 45.00, category: "fashion" },
+        { id: 5, name: "Gaming Mouse", price: 60.00, category: "electronics" },
+        { id: 6, name: "Water Bottle", price: 20.00, category: "accessories" },
+    ];
+
+    // State
+    let cart = []; // Array of { ...product, qty: number }
+    let appliedCoupon = null;
+
+    // --- Initialization ---
+    document.addEventListener('DOMContentLoaded', () => {
+        renderProducts();
+        renderCart();
+    });
+
+    // --- Core Functions ---
+
+    // 1. Render Product Catalog
+    function renderProducts() {
+        const grid = document.getElementById('product-grid');
+        grid.innerHTML = products.map(p => `
+            <div class="product-card">
+                <div>
+                    <div class="p-cat">${p.category}</div>
+                    <div class="p-name">${p.name}</div>
+                    <div class="p-price">$${p.price.toFixed(2)}</div>
+                </div>
+                <button class="btn-add" onclick="addToCart(${p.id})">
+                    <i class="fas fa-plus"></i> Add to Cart
+                </button>
+            </div>
+        `).join('');
+    }
+
+    // 2. Add Item Logic
+    function addToCart(id) {
+        const existingItem = cart.find(item => item.id === id);
+        
+        if (existingItem) {
+            existingItem.qty++;
+        } else {
+            const product = products.find(p => p.id === id);
+            cart.push({ ...product, qty: 1 });
+        }
+        renderCart();
+    }
+
+    // 3. Update Quantity & Remove
+    function updateQty(id, change) {
+        const item = cart.find(i => i.id === id);
+        if (!item) return;
+
+        item.qty += change;
+
+        if (item.qty <= 0) {
+            cart = cart.filter(i => i.id !== id);
+        }
+        renderCart();
+    }
+
+    // 4. Render Cart & Calculate Logic
+    function renderCart() {
+        const container = document.getElementById('cart-items');
+        const countBadge = document.getElementById('cart-count');
+        
+        // Update Count
+        const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+        countBadge.innerText = totalItems;
+
+        // Render List
+        if (cart.length === 0) {
+            container.innerHTML = `
+                <div class="empty-cart">
+                    <i class="fas fa-shopping-basket"></i>
+                    <p>Your cart is empty</p>
+                </div>`;
+        } else {
+            container.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <div class="item-info">
+                        <h4>${item.name}</h4>
+                        <span>$${item.price} x ${item.qty}</span>
+                        ${item.qty >= 5 ? '<span style="color:var(--success); font-size:0.75rem; display:block;">Bulk Deal Applied!</span>' : ''}
+                    </div>
+                    <div class="item-controls">
+                        <button class="qty-btn" onclick="updateQty(${item.id}, -1)">-</button>
+                        <span style="font-weight:600; font-size:0.9rem; width:20px; text-align:center;">${item.qty}</span>
+                        <button class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        calculateTotals();
+    }
+
+    // 5. Advanced Discount Calculation Engine
+    function calculateTotals() {
+        let subtotal = 0;
+        let discountTotal = 0;
+        let discountBreakdown = []; // Stores strings like "Bulk Discount: -$10"
+
+        // Step A: Calculate Subtotal & Item-Level Discounts (Bulk)
+        cart.forEach(item => {
+            const lineTotal = item.price * item.qty;
+            subtotal += lineTotal;
+
+            // RULE: Bulk Discount (Buy 5+ of same item, get 10% off that item)
+            if (item.qty >= 5) {
+                const saving = lineTotal * 0.10;
+                discountTotal += saving;
+                discountBreakdown.push(`Bulk (${item.name}): -$${saving.toFixed(2)}`);
+            }
+        });
+
+        // Step B: Category Discounts
+        // RULE: Electronics Discount (If cart has electronics, 5% off electronics total)
+        const electronicsTotal = cart
+            .filter(i => i.category === 'electronics')
+            .reduce((sum, i) => sum + (i.price * i.qty), 0);
+        
+        if (electronicsTotal > 0) {
+            const elecSaving = electronicsTotal * 0.05;
+            discountTotal += elecSaving;
+            discountBreakdown.push(`Tech Deal (5%): -$${elecSaving.toFixed(2)}`);
+        }
+
+        // Step C: Time-Based Discount
+        // RULE: Happy Hour (Simulated by checkbox)
+        const isHappyHour = document.getElementById('happyHourCheck').checked;
+        if (isHappyHour) {
+            const timeSaving = subtotal * 0.05; // 5% flat off subtotal
+            discountTotal += timeSaving;
+            discountBreakdown.push(`Happy Hour (5%): -$${timeSaving.toFixed(2)}`);
+        }
+
+        // Step D: Coupon Codes
+        if (appliedCoupon) {
+            if (appliedCoupon.type === 'percent') {
+                const couponSave = subtotal * (appliedCoupon.value / 100);
+                discountTotal += couponSave;
+                discountBreakdown.push(`Code ${appliedCoupon.code}: -$${couponSave.toFixed(2)}`);
+            } else if (appliedCoupon.type === 'flat') {
+                discountTotal += appliedCoupon.value;
+                discountBreakdown.push(`Code ${appliedCoupon.code}: -$${appliedCoupon.value.toFixed(2)}`);
+            }
+        }
+
+        // Prevent negative total
+        const finalTotal = Math.max(0, subtotal - discountTotal);
+
+        // Update DOM
+        document.getElementById('subtotal').innerText = `$${subtotal.toFixed(2)}`;
+        document.getElementById('final-total').innerText = `$${finalTotal.toFixed(2)}`;
+        
+        // Render Discount Rows
+        const discountContainer = document.getElementById('discount-rows');
+        discountContainer.innerHTML = discountBreakdown.map(text => `
+            <div class="summary-row discount-text">
+                <span><i class="fas fa-tag"></i> Discount</span>
+                <span>${text.split(': ')[1]}</span>
+            </div>
+            <div style="font-size:0.7rem; color:#9ca3af; margin-bottom:5px; margin-top:-5px; text-align:right;">${text.split(': ')[0]}</div>
+        `).join('');
+    }
+
+    // 6. Coupon System
+    function applyCoupon() {
+        const input = document.getElementById('coupon-code');
+        const msg = document.getElementById('coupon-msg');
+        const code = input.value.trim().toUpperCase();
+
+        // Coupon Database
+        const validCoupons = {
+            'SAVE10': { type: 'percent', value: 10 },
+            'WELCOME20': { type: 'flat', value: 20 },
+            'BIGSALE': { type: 'percent', value: 25 }
+        };
+
+        if (code === "") {
+            msg.innerText = "";
+            return;
+        }
+
+        if (validCoupons[code]) {
+            appliedCoupon = { code, ...validCoupons[code] };
+            msg.style.color = "var(--success)";
+            msg.innerText = `Coupon '${code}' applied successfully!`;
+            input.value = ""; // clear input
+            renderCart(); // recalculate
+        } else {
+            msg.style.color = "var(--danger)";
+            msg.innerText = "Invalid coupon code.";
+            appliedCoupon = null;
+            renderCart();
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow Engine | Multi-Stage Form</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- ADVANCED VARIABLES & RESET --- */
+        :root {
+            --primary: #6366f1; /* Indigo */
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --secondary: #ec4899; /* Pink accent */
+            --success: #10b981;
+            --error: #f43f5e;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --surface: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --bg-gradient: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            --radius: 24px;
+            --transition: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        body {
+            background: #0f172a;
+            background-image: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text-main);
+        }
+
+        /* --- GLASSMORPHISM CARD --- */
+        .wizard-card {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            width: 100%;
+            max-width: 650px;
+            border-radius: var(--radius);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* --- PROGRESS HEADER --- */
+        .progress-area {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 40px 40px 20px 40px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .stepper-wrapper {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        /* Track Line */
+        .stepper-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            z-index: 0;
+            transform: translateY(-50%);
+        }
+
+        /* Animated Fill Line */
+        .progress-fill {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            z-index: 1;
+            width: 0%;
+            transition: width 0.5s var(--transition);
+            transform: translateY(-50%);
+        }
+
+        /* Step Circles */
+        .step-item {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--text-muted);
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .step-item.active {
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+            transform: scale(1.1);
+        }
+
+        .step-item.completed {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .step-title {
+            text-align: center;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin-top: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        /* --- FORM CONTENT & ANIMATIONS --- */
+        .form-content {
+            padding: 40px;
+            min-height: 380px;
+        }
+
+        .stage {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeSlideUp 0.5s forwards;
+        }
+
+        .stage.active { display: block; }
+
+        @keyframes fadeSlideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 { font-size: 1.8rem; margin-bottom: 8px; color: var(--text-main); letter-spacing: -1px; }
+        p.desc { color: var(--text-muted); margin-bottom: 30px; font-size: 0.95rem; line-height: 1.5; }
+
+        /* --- INPUT STYLING --- */
+        .input-group { margin-bottom: 25px; position: relative; }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.3s ease;
+            outline: none;
+            color: var(--text-main);
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+        }
+
+        /* Error States with Shake Animation */
+        input.error, select.error {
+            border-color: var(--error);
+            background: #fff5f5;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .error-msg {
+            color: var(--error);
+            font-size: 0.8rem;
+            margin-top: 6px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: all 0.3s;
+            height: 0;
+            overflow: hidden;
+        }
+
+        .input-group.has-error .error-msg {
+            opacity: 1;
+            transform: translateY(0);
+            height: auto;
+        }
+
+        /* --- REVIEW SECTION --- */
+        .review-card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .review-row strong { display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; letter-spacing: 0.5px; }
+        .review-row span { font-weight: 600; color: var(--text-main); font-size: 1rem; }
+
+        /* Custom Checkbox */
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 25px;
+            padding: 15px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        
+        .checkbox-wrapper:hover { background: white; }
+
+        input[type="checkbox"] {
+            width: 20px; height: 20px; accent-color: var(--primary);
+        }
+
+        /* --- FOOTER ACTIONS --- */
+        .actions-footer {
+            padding: 20px 40px 40px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+
+        button {
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back {
+            background: transparent;
+            color: var(--text-muted);
+        }
+        .btn-back:hover { background: #f1f5f9; color: var(--text-main); }
+        .btn-back:disabled { opacity: 0; pointer-events: none; }
+
+        .btn-next {
+            background: var(--text-main);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .btn-next:hover {
+            transform: translateY(-2px);
+            background: black;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            display: none;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--primary-glow);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="wizard-card">
+        <div class="progress-area">
+            <div class="stepper-wrapper">
+                <div class="progress-fill" id="progress-bar"></div>
+                <div class="step-item active">1</div>
+                <div class="step-item">2</div>
+                <div class="step-item">3</div>
+                <div class="step-item">4</div>
+            </div>
+            <div class="step-title" id="step-title">Account Setup</div>
+        </div>
+
+        <div class="form-content">
+            
+            <div class="stage active" data-step="1">
+                <h2>Create Account</h2>
+                <p class="desc">Let's start by setting up your login credentials.</p>
+                
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" id="username" placeholder="e.g. duolingo">
+                    <div class="error-msg"><i class="fas fa-circle-exclamation"></i> Min 4 chars required</div>
+                </div>
+
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="••••••••">
+                    <div class="error-msg"><i class="fas fa-circle-exclamation"></i> Min 6 chars required</div>
+                </div>
+            </div>
+
+            <div class="stage" data-step="2">
+                <h2>Personal Details</h2>
+                <p class="desc">We need a little more info to personalize your profile.</p>
+
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input type="text" id="fullname" placeholder="Duo Lingo">
+                    <div class="error-msg"><i class="fas fa-circle-exclamation"></i> Name is required</div>
+                </div>
+
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" placeholder="duolingo@company.com">
+                    <div class="error-msg"><i class="fas fa-circle-exclamation"></i> Invalid email address</div>
+                </div>
+            </div>
+
+            <div class="stage" data-step="3">
+                <h2>Preferences</h2>
+                <p class="desc">Customize your workspace experience.</p>
+
+                <div class="input-group">
+                    <label>Primary Role</label>
+                    <select id="role">
+                        <option value="">Select your role...</option>
+                        <option value="Developer">Developer</option>
+                        <option value="Designer">Designer</option>
+                        <option value="Manager">Product Manager</option>
+                    </select>
+                    <div class="error-msg"><i class="fas fa-circle-exclamation"></i> Please select a role</div>
+                </div>
+
+                <div class="input-group">
+                    <label>Updates</label>
+                    <select id="updates">
+                        <option value="weekly">Weekly Digest</option>
+                        <option value="important">Important Updates Only</option>
+                        <option value="none">Don't Send Emails</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="stage" data-step="4">
+                <h2>Review & Submit</h2>
+                <p class="desc">Please verify your information below.</p>
+
+                <div class="review-card" id="review-container">
+                    </div>
+
+                <label class="checkbox-wrapper">
+                    <input type="checkbox" id="confirm-check">
+                    <span>I confirm that the information provided is accurate.</span>
+                </label>
+                <div class="input-group">
+                     <div class="error-msg" id="confirm-error"><i class="fas fa-circle-exclamation"></i> Confirmation required</div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="actions-footer">
+            <button class="btn-back" id="btn-back" disabled>Back</button>
+            <button class="btn-next" id="btn-next">Next Step <i class="fas fa-arrow-right"></i></button>
+            <button class="btn-submit" id="btn-submit">Complete Setup <i class="fas fa-check"></i></button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA STATE ---
+        const state = {
+            step: 1,
+            data: {
+                username: '', password: '', fullname: '', email: '', role: '', updates: ''
+            }
+        };
+
+        const stepsInfo = ["Account Setup", "Personal Details", "Preferences", "Review"];
+        const TOTAL_STEPS = 4;
+
+        // --- DOM ELEMENTS ---
+        const els = {
+            stages: document.querySelectorAll('.stage'),
+            indicators: document.querySelectorAll('.step-item'),
+            progress: document.getElementById('progress-bar'),
+            title: document.getElementById('step-title'),
+            btnNext: document.getElementById('btn-next'),
+            btnBack: document.getElementById('btn-back'),
+            btnSubmit: document.getElementById('btn-submit'),
+            reviewBox: document.getElementById('review-container')
+        };
+
+        // --- INIT & EVENTS ---
+        function init() {
+            updateUI();
+            
+            els.btnNext.addEventListener('click', () => {
+                if (validate(state.step)) {
+                    saveData(state.step);
+                    if (state.step < TOTAL_STEPS) {
+                        state.step++;
+                        updateUI();
+                    }
+                }
+            });
+
+            els.btnBack.addEventListener('click', () => {
+                if (state.step > 1) {
+                    state.step--;
+                    updateUI();
+                }
+            });
+
+            els.btnSubmit.addEventListener('click', () => {
+                if (validate(state.step)) {
+                    // Simulate Submission
+                    els.btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                    setTimeout(() => {
+                        alert("Success! Workflow Complete.\n\n" + JSON.stringify(state.data, null, 2));
+                        location.reload();
+                    }, 1500);
+                }
+            });
+        }
+
+        // --- CORE LOGIC ---
+        function updateUI() {
+            // 1. Show correct stage
+            els.stages.forEach((stage, idx) => {
+                if (idx + 1 === state.step) {
+                    stage.classList.add('active');
+                    // Reset animation
+                    stage.style.animation = 'none';
+                    stage.offsetHeight; /* trigger reflow */
+                    stage.style.animation = 'fadeSlideUp 0.5s forwards';
+                } else {
+                    stage.classList.remove('active');
+                }
+            });
+
+            // 2. Update Progress Bar
+            const percent = ((state.step - 1) / (TOTAL_STEPS - 1)) * 100;
+            els.progress.style.width = `${percent}%`;
+
+            // 3. Update Indicators
+            els.indicators.forEach((dot, idx) => {
+                if (idx + 1 < state.step) {
+                    dot.classList.add('completed');
+                    dot.classList.remove('active');
+                    dot.innerHTML = '<i class="fas fa-check"></i>';
+                } else if (idx + 1 === state.step) {
+                    dot.classList.add('active');
+                    dot.classList.remove('completed');
+                    dot.innerHTML = idx + 1;
+                } else {
+                    dot.classList.remove('active', 'completed');
+                    dot.innerHTML = idx + 1;
+                }
+            });
+
+            // 4. Update Header Text
+            els.title.innerText = stepsInfo[state.step - 1];
+
+            // 5. Update Buttons
+            els.btnBack.disabled = state.step === 1;
+            els.btnBack.style.opacity = state.step === 1 ? '0' : '1';
+
+            if (state.step === TOTAL_STEPS) {
+                els.btnNext.style.display = 'none';
+                els.btnSubmit.style.display = 'flex';
+                renderReview();
+            } else {
+                els.btnNext.style.display = 'flex';
+                els.btnSubmit.style.display = 'none';
+            }
+        }
+
+        function validate(step) {
+            let valid = true;
+            
+            // Helper to toggle error
+            const toggleError = (id, condition) => {
+                const input = document.getElementById(id);
+                const group = input.closest('.input-group');
+                if (!condition) {
+                    input.classList.add('error');
+                    group.classList.add('has-error');
+                    valid = false;
+                } else {
+                    input.classList.remove('error');
+                    group.classList.remove('has-error');
+                }
+            };
+
+            if (step === 1) {
+                const u = document.getElementById('username').value.trim();
+                const p = document.getElementById('password').value.trim();
+                toggleError('username', u.length >= 4);
+                toggleError('password', p.length >= 6);
+            }
+            else if (step === 2) {
+                const n = document.getElementById('fullname').value.trim();
+                const e = document.getElementById('email').value.trim();
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                toggleError('fullname', n.length > 0);
+                toggleError('email', emailRegex.test(e));
+            }
+            else if (step === 3) {
+                const r = document.getElementById('role').value;
+                toggleError('role', r !== "");
+            }
+            else if (step === 4) {
+                const checked = document.getElementById('confirm-check').checked;
+                const errDiv = document.getElementById('confirm-error');
+                const group = errDiv.closest('.input-group');
+                
+                if(!checked) {
+                    group.classList.add('has-error');
+                    valid = false;
+                } else {
+                    group.classList.remove('has-error');
+                }
+            }
+
+            return valid;
+        }
+
+        function saveData(step) {
+            if (step === 1) {
+                state.data.username = document.getElementById('username').value;
+                state.data.password = document.getElementById('password').value;
+            } else if (step === 2) {
+                state.data.fullname = document.getElementById('fullname').value;
+                state.data.email = document.getElementById('email').value;
+            } else if (step === 3) {
+                state.data.role = document.getElementById('role').value;
+                state.data.updates = document.getElementById('updates').value;
+            }
+        }
+
+        function renderReview() {
+            els.reviewBox.innerHTML = `
+                <div class="review-row"><strong>Username</strong><span>${state.data.username}</span></div>
+                <div class="review-row"><strong>Full Name</strong><span>${state.data.fullname}</span></div>
+                <div class="review-row"><strong>Email</strong><span>${state.data.email}</span></div>
+                <div class="review-row"><strong>Role</strong><span>${state.data.role}</span></div>
+                <div class="review-row"><strong>Updates</strong><span>${state.data.updates}</span></div>
+                <div class="review-row"><strong>Password</strong><span>******</span></div>
+            `;
+        }
+
+        // Run
+        init();
+
+    </script>
+</body>
+</html>

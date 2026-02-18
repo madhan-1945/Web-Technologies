@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Registration System</title>
+    <style>
+        /* --- PROFESSIONAL CLASSIC CSS --- */
+        :root {
+            --primary: #4f46e5;       /* Indigo 600 */
+            --primary-dark: #4338ca;  /* Indigo 700 */
+            --success: #059669;       /* Emerald 600 */
+            --error: #dc2626;         /* Red 600 */
+            --surface: #ffffff;
+            --background: #f8fafc;    /* Slate 50 */
+            --text-main: #1e293b;     /* Slate 800 */
+            --text-sub: #64748b;      /* Slate 500 */
+            --border: #cbd5e1;        /* Slate 300 */
+            --radius: 8px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- CARD COMPONENT --- */
+        .card {
+            background: var(--surface);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 450px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid #e2e8f0;
+        }
+
+        .card-header { text-align: center; margin-bottom: 2rem; }
+        .card-header h2 { font-size: 1.75rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem; }
+        .card-header p { color: var(--text-sub); font-size: 0.95rem; }
+
+        /* --- FORM STYLES --- */
+        .form-group { margin-bottom: 1.5rem; position: relative; }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .input-wrapper { position: relative; }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            padding-right: 45px; /* Space for icon */
+            font-size: 1rem;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            transition: all 0.2s ease;
+            outline: none;
+            color: var(--text-main);
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        /* Validation Colors */
+        input.valid { border-color: var(--success); background-color: #f0fdf4; }
+        input.invalid { border-color: var(--error); background-color: #fef2f2; }
+
+        /* --- ICONS & LOADER --- */
+        .status-icon {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            pointer-events: none;
+            display: none;
+        }
+
+        .loader {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            margin-top: -10px; /* Half height to center */
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e2e8f0;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        /* --- FEEDBACK MESSAGE --- */
+        .feedback {
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            font-weight: 500;
+            min-height: 20px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .feedback.show { opacity: 1; }
+        .text-success { color: var(--success); }
+        .text-error { color: var(--error); }
+
+        /* --- SUBMIT BUTTON --- */
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        button.active { opacity: 1; pointer-events: all; }
+        button.active:hover { background-color: var(--primary-dark); }
+
+        /* --- TOAST NOTIFICATION --- */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: var(--text-main);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+            font-weight: 500;
+            z-index: 100;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* --- LIST DISPLAY (For Demo) --- */
+        .db-view {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            text-align: center;
+        }
+        .db-view span { font-weight: 600; color: var(--text-main); }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="toast" class="toast">Account Created Successfully!</div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Join Us</h2>
+            <p>Create your username to get started.</p>
+        </div>
+
+        <form id="regForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <div class="input-wrapper">
+                    <input type="text" id="username" placeholder="Type a username..." autocomplete="off">
+                    
+                    <div class="loader" id="loader"></div>
+                    
+                    <div class="status-icon" id="icon-success">✅</div>
+                    <div class="status-icon" id="icon-error">⛔</div>
+                </div>
+                <div class="feedback" id="feedback"></div>
+            </div>
+
+            <button type="submit" id="submitBtn">Create Account</button>
+        </form>
+
+        <div class="db-view">
+            Existing users: <span id="dbList">admin, root</span>
+        </div>
+    </div>
+
+<script>
+    /**
+     * --- 1. DYNAMIC BACKEND SIMULATION ---
+     * This handles the "Database" and generates the JSON file for Fetch.
+     */
+    
+    // Initial Data
+    let mockUserDB = [
+        { username: "admin" },
+        { username: "root" },
+        { username: "test" }
+    ];
+
+    let currentJsonUrl = null;
+
+    // Function to generate/refresh the JSON Blob URL
+    function refreshApiEndpoint() {
+        const jsonData = JSON.stringify(mockUserDB);
+        const blob = new Blob([jsonData], {type: 'application/json'});
+        
+        // Revoke old URL to prevent memory leaks
+        if (currentJsonUrl) URL.revokeObjectURL(currentJsonUrl);
+        
+        // Create new URL
+        currentJsonUrl = URL.createObjectURL(blob);
+        
+        // Update the visual list at the bottom (for demo purposes)
+        document.getElementById('dbList').textContent = mockUserDB.map(u => u.username).join(', ');
+    }
+
+    // Initialize the API
+    refreshApiEndpoint();
+
+
+    /**
+     * --- 2. FRONTEND LOGIC ---
+     */
+    const usernameInput = document.getElementById('username');
+    const feedbackEl = document.getElementById('feedback');
+    const loader = document.getElementById('loader');
+    const submitBtn = document.getElementById('submitBtn');
+    const iconSuccess = document.getElementById('icon-success');
+    const iconError = document.getElementById('icon-error');
+    const toast = document.getElementById('toast');
+
+    let debounceTimer;
+
+    // --- Input Listener ---
+    usernameInput.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+
+        // 1. Reset UI
+        resetUI();
+
+        // 2. Basic Validation
+        if (val.length === 0) return;
+        
+        if (val.length < 3) {
+            showFeedback('error', 'Username is too short (min 3 chars)');
+            return;
+        }
+
+        // 3. Show Loader
+        loader.style.display = 'block';
+
+        // 4. Debounce (Wait 500ms before fetching)
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            checkAvailability(val);
+        }, 500);
+    });
+
+    // --- AJAX Check ---
+    async function checkAvailability(username) {
+        try {
+            // Fetch from our dynamic URL
+            const response = await fetch(currentJsonUrl);
+            const users = await response.json();
+
+            // Fake Network Delay (600ms)
+            await new Promise(r => setTimeout(r, 600));
+
+            // Check if username exists (Case Insensitive)
+            const exists = users.some(u => u.username.toLowerCase() === username.toLowerCase());
+
+            loader.style.display = 'none';
+
+            if (exists) {
+                showFeedback('error', 'Username already taken');
+                toggleSubmit(false);
+            } else {
+                showFeedback('success', 'Username available');
+                toggleSubmit(true);
+            }
+
+        } catch (err) {
+            console.error(err);
+            loader.style.display = 'none';
+            showFeedback('error', 'Server error. Please try again.');
+        }
+    }
+
+    // --- Form Submission (The "Registration" Step) ---
+    document.getElementById('regForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const newUsername = usernameInput.value.trim();
+
+        // 1. "Save" to Backend
+        mockUserDB.push({ username: newUsername });
+        
+        // 2. Refresh the API Endpoint (so next fetch sees the new user)
+        refreshApiEndpoint();
+
+        // 3. Show Success Toast
+        showToast();
+
+        // 4. Reset Form
+        usernameInput.value = '';
+        resetUI();
+    });
+
+    // --- Helper Functions ---
+    function showFeedback(type, msg) {
+        feedbackEl.textContent = msg;
+        feedbackEl.classList.add('show');
+
+        if (type === 'success') {
+            usernameInput.classList.add('valid');
+            feedbackEl.className = 'feedback show text-success';
+            iconSuccess.style.display = 'block';
+        } else {
+            usernameInput.classList.add('invalid');
+            feedbackEl.className = 'feedback show text-error';
+            iconError.style.display = 'block';
+        }
+    }
+
+    function resetUI() {
+        loader.style.display = 'none';
+        iconSuccess.style.display = 'none';
+        iconError.style.display = 'none';
+        usernameInput.classList.remove('valid', 'invalid');
+        feedbackEl.classList.remove('show');
+        toggleSubmit(false);
+    }
+
+    function toggleSubmit(enable) {
+        if (enable) {
+            submitBtn.classList.add('active');
+        } else {
+            submitBtn.classList.remove('active');
+        }
+    }
+
+    function showToast() {
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+</script>
+</body>
+</html>

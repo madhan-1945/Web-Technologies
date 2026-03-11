@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Employee Management (XML)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CLASSIC PROFESSIONAL CSS --- */
+        :root {
+            --primary: #0056b3;       /* Corporate Blue */
+            --primary-dark: #004494;
+            --accent: #ffc107;        /* Warning/Edit */
+            --danger: #dc3545;        /* Delete */
+            --success: #28a745;       /* Success */
+            --light-bg: #f4f6f9;
+            --white: #ffffff;
+            --border: #dee2e6;
+            --text-dark: #343a40;
+            --text-muted: #6c757d;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 { font-size: 1.5rem; font-weight: 500; }
+        .navbar .badge { background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 4px; font-size: 0.85rem; }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 350px 1fr; /* Sidebar Form + Main Table */
+            gap: 2rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body { padding: 1.5rem; }
+
+        /* Form Styles */
+        .form-group { margin-bottom: 1.25rem; }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.15);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn-primary { background-color: var(--primary); color: white; width: 100%; }
+        .btn-primary:hover { background-color: var(--primary-dark); }
+
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.85rem; width: auto; margin-right: 5px; }
+        
+        .btn-edit { background-color: #e2e6ea; color: var(--text-dark); }
+        .btn-edit:hover { background-color: #dbe2e8; }
+
+        .btn-delete { background-color: #ffeef0; color: var(--danger); }
+        .btn-delete:hover { background-color: #ffdce0; }
+
+        .btn-cancel { background-color: transparent; border: 1px solid var(--border); color: var(--text-muted); width: 100%; margin-top: 10px; }
+        .btn-cancel:hover { background-color: #f8f9fa; }
+
+        /* Table Styles */
+        table { width: 100%; border-collapse: collapse; }
+        
+        th {
+            text-align: left;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+            vertical-align: middle;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: #f8f9fa; }
+
+        /* Feedback Alerts */
+        .alert {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* Loading Spinner */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <h1>HR System <small style="font-size: 0.8rem; opacity: 0.8; font-weight: 300;">| using XML</small></h1>
+        <div class="badge">Data Source: Local XML Blob</div>
+    </nav>
+
+    <div class="container">
+        
+        <div class="card">
+            <div class="card-header">
+                <span id="formTitle">Add New Employee</span>
+            </div>
+            <div class="card-body">
+                <div id="formAlert" class="alert"></div>
+
+                <form id="empForm">
+                    <div class="form-group">
+                        <label for="empId">Employee ID</label>
+                        <input type="number" id="empId" placeholder="Auto-generated" disabled style="background: #e9ecef;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" placeholder="e.g. John Doe" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="department">Department</label>
+                        <input type="text" id="department" placeholder="e.g. Engineering" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="salary">Salary ($)</label>
+                        <input type="number" id="salary" placeholder="e.g. 75000" min="0" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="saveBtn">Save Record</button>
+                    <button type="button" class="btn btn-cancel" id="cancelBtn" style="display: none;">Cancel Edit</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span>Employee Directory</span>
+                <button class="btn btn-sm btn-edit" onclick="fetchEmployees()">↻ Refresh XML</button>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <div id="loader" class="loader" style="margin: 20px auto;"></div>
+                <div id="tableAlert" class="alert" style="margin: 20px;"></div>
+
+                <table id="empTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Salary</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        </tbody>
+                </table>
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    No records found in XML file.
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    /**
+     * --- 1. XML BACKEND SIMULATION ---
+     * This class manages the XML "File".
+     * Since browsers cannot write to disk directly, we maintain an XML string
+     * and convert it to a Blob URL to simulate a file server.
+     */
+    class XMLFileSystem {
+        constructor() {
+            // Initial XML Content
+            this.xmlContent = `
+<employees>
+    <employee>
+        <id>101</id>
+        <name>Alice Johnson</name>
+        <department>IT Support</department>
+        <salary>55000</salary>
+    </employee>
+    <employee>
+        <id>102</id>
+        <name>Michael Chen</name>
+        <department>Development</department>
+        <salary>82000</salary>
+    </employee>
+    <employee>
+        <id>103</id>
+        <name>Sarah Connor</name>
+        <department>Security</department>
+        <salary>70000</salary>
+    </employee>
+</employees>`;
+            this.currentBlobUrl = null;
+            this.parser = new DOMParser();
+            this.serializer = new XMLSerializer();
+        }
+
+        // Returns a URL that AJAX can "GET"
+        getFileUrl() {
+            if (this.currentBlobUrl) URL.revokeObjectURL(this.currentBlobUrl);
+            const blob = new Blob([this.xmlContent], { type: "text/xml" });
+            this.currentBlobUrl = URL.createObjectURL(blob);
+            return this.currentBlobUrl;
+        }
+
+        // --- INTERNAL CRUD HELPERS (Updating the in-memory XML string) ---
+        
+        getDoc() {
+            return this.parser.parseFromString(this.xmlContent, "text/xml");
+        }
+
+        saveDoc(xmlDoc) {
+            this.xmlContent = this.serializer.serializeToString(xmlDoc);
+        }
+
+        addEmployee(name, dept, salary) {
+            const doc = this.getDoc();
+            const root = doc.getElementsByTagName("employees")[0];
+            
+            // Auto-generate ID (Max ID + 1)
+            const employees = doc.getElementsByTagName("employee");
+            let maxId = 100;
+            for(let i=0; i<employees.length; i++) {
+                const id = parseInt(employees[i].getElementsByTagName("id")[0].textContent);
+                if(id > maxId) maxId = id;
+            }
+            const newId = maxId + 1;
+
+            // Create New Node
+            const newEmp = doc.createElement("employee");
+            
+            const idNode = doc.createElement("id"); idNode.textContent = newId;
+            const nameNode = doc.createElement("name"); nameNode.textContent = name;
+            const deptNode = doc.createElement("department"); deptNode.textContent = dept;
+            const salNode = doc.createElement("salary"); salNode.textContent = salary;
+
+            newEmp.appendChild(idNode);
+            newEmp.appendChild(nameNode);
+            newEmp.appendChild(deptNode);
+            newEmp.appendChild(salNode);
+            
+            root.appendChild(newEmp);
+            this.saveDoc(doc);
+            return newId;
+        }
+
+        updateEmployee(id, name, dept, salary) {
+            const doc = this.getDoc();
+            const employees = doc.getElementsByTagName("employee");
+            let found = false;
+
+            for (let i = 0; i < employees.length; i++) {
+                const empId = employees[i].getElementsByTagName("id")[0].textContent;
+                if (empId == id) {
+                    employees[i].getElementsByTagName("name")[0].textContent = name;
+                    employees[i].getElementsByTagName("department")[0].textContent = dept;
+                    employees[i].getElementsByTagName("salary")[0].textContent = salary;
+                    found = true;
+                    break;
+                }
+            }
+            if(found) this.saveDoc(doc);
+            return found;
+        }
+
+        deleteEmployee(id) {
+            const doc = this.getDoc();
+            const employees = doc.getElementsByTagName("employee");
+            const root = doc.getElementsByTagName("employees")[0];
+            let found = false;
+
+            for (let i = 0; i < employees.length; i++) {
+                const empId = employees[i].getElementsByTagName("id")[0].textContent;
+                if (empId == id) {
+                    root.removeChild(employees[i]);
+                    found = true;
+                    break;
+                }
+            }
+            if(found) this.saveDoc(doc);
+            return found;
+        }
+    }
+
+    const fileSystem = new XMLFileSystem();
+
+    /**
+     * --- 2. FRONTEND LOGIC (AJAX & DOM) ---
+     */
+    
+    // UI Elements
+    const tableBody = document.getElementById('tableBody');
+    const loader = document.getElementById('loader');
+    const form = document.getElementById('empForm');
+    const formAlert = document.getElementById('formAlert');
+    const tableAlert = document.getElementById('tableAlert');
+    const saveBtn = document.getElementById('saveBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const formTitle = document.getElementById('formTitle');
+
+    // State
+    let isEditing = false;
+    let editingId = null;
+
+    // Load Data on Start
+    document.addEventListener('DOMContentLoaded', fetchEmployees);
+
+    // --- READ OPERATION (AJAX) ---
+    function fetchEmployees() {
+        showLoader(true);
+        tableBody.innerHTML = ''; // Clear table
+        document.getElementById('emptyState').style.display = 'none';
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", fileSystem.getFileUrl(), true);
+        
+        // IMPORTANT: Set responseType to parse XML automatically
+        xhr.responseType = "document"; 
+
+        xhr.onload = function() {
+            showLoader(false);
+            if (xhr.status === 200) {
+                const xmlResponse = xhr.responseXML;
+                
+                // Handle Malformed XML or Empty Response
+                if (!xmlResponse || !xmlResponse.getElementsByTagName("employees")) {
+                    showAlert(tableAlert, 'error', 'Error: Invalid or Malformed XML');
+                    return;
+                }
+
+                const employees = xmlResponse.getElementsByTagName("employee");
+                
+                if (employees.length === 0) {
+                    document.getElementById('emptyState').style.display = 'block';
+                } else {
+                    renderTable(employees);
+                }
+            } else {
+                showAlert(tableAlert, 'error', 'Failed to fetch XML file.');
+            }
+        };
+
+        xhr.onerror = function() {
+            showLoader(false);
+            showAlert(tableAlert, 'error', 'Network Error occurred.');
+        };
+
+        xhr.send();
+    }
+
+    // --- RENDER TABLE (DOM Manipulation) ---
+    function renderTable(employeeNodes) {
+        for (let i = 0; i < employeeNodes.length; i++) {
+            const emp = employeeNodes[i];
+            
+            // Extract data using XML traversal
+            const id = emp.getElementsByTagName("id")[0].textContent;
+            const name = emp.getElementsByTagName("name")[0].textContent;
+            const dept = emp.getElementsByTagName("department")[0].textContent;
+            const salary = emp.getElementsByTagName("salary")[0].textContent;
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>#${id}</strong></td>
+                <td>${name}</td>
+                <td><span style="background:#e9ecef; padding: 4px 8px; border-radius:4px; font-size:0.85rem;">${dept}</span></td>
+                <td>$${parseInt(salary).toLocaleString()}</td>
+                <td style="text-align: right;">
+                    <button class="btn btn-sm btn-edit" onclick="editEmployee(${id}, '${name}', '${dept}', ${salary})">Edit</button>
+                    <button class="btn btn-sm btn-delete" onclick="deleteEmployee(${id})">Delete</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        }
+    }
+
+    // --- CREATE & UPDATE OPERATIONS ---
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const name = document.getElementById('name').value;
+        const dept = document.getElementById('department').value;
+        const salary = document.getElementById('salary').value;
+
+        if(isEditing) {
+            // Update
+            const success = fileSystem.updateEmployee(editingId, name, dept, salary);
+            if(success) {
+                showAlert(formAlert, 'success', `Employee #${editingId} updated successfully.`);
+                resetForm();
+                fetchEmployees();
+            } else {
+                showAlert(formAlert, 'error', 'Error updating record.');
+            }
+        } else {
+            // Create
+            fileSystem.addEmployee(name, dept, salary);
+            showAlert(formAlert, 'success', 'New employee added to XML.');
+            resetForm();
+            fetchEmployees();
+        }
+    });
+
+    // --- DELETE OPERATION ---
+    window.deleteEmployee = function(id) {
+        if(confirm(`Are you sure you want to delete Employee #${id}?`)) {
+            const success = fileSystem.deleteEmployee(id);
+            if(success) {
+                fetchEmployees(); // Re-fetch to update UI
+                // Toast notification logic could go here
+            } else {
+                showAlert(tableAlert, 'error', 'Could not delete employee.');
+            }
+        }
+    };
+
+    // --- EDIT MODE SETUP ---
+    window.editEmployee = function(id, name, dept, salary) {
+        isEditing = true;
+        editingId = id;
+        
+        document.getElementById('empId').value = id;
+        document.getElementById('name').value = name;
+        document.getElementById('department').value = dept;
+        document.getElementById('salary').value = salary;
+
+        formTitle.textContent = `Edit Employee #${id}`;
+        saveBtn.textContent = 'Update Record';
+        saveBtn.classList.remove('btn-primary');
+        saveBtn.style.backgroundColor = 'var(--accent)';
+        saveBtn.style.color = '#000';
+        cancelBtn.style.display = 'inline-block';
+    };
+
+    cancelBtn.addEventListener('click', resetForm);
+
+    function resetForm() {
+        form.reset();
+        isEditing = false;
+        editingId = null;
+        formTitle.textContent = 'Add New Employee';
+        saveBtn.textContent = 'Save Record';
+        saveBtn.style.backgroundColor = ''; // Reset to CSS default
+        saveBtn.style.color = '';
+        saveBtn.classList.add('btn-primary');
+        cancelBtn.style.display = 'none';
+        formAlert.style.display = 'none';
+    }
+
+    // --- HELPERS ---
+    function showLoader(show) {
+        loader.style.display = show ? 'block' : 'none';
+    }
+
+    function showAlert(element, type, msg) {
+        element.textContent = msg;
+        element.className = `alert alert-${type}`;
+        element.style.display = 'block';
+        setTimeout(() => { element.style.display = 'none'; }, 3000);
+    }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIT-AP University | Amaravati</title>
+
+    <style>
+        :root {
+            --vit-red: #8B0000;
+            --vit-blue: #004d99;
+            --light-grey: #f4f4f4;
+            --dark-text: #333;
+            --white: #fff;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-grey);
+            color: var(--dark-text);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--vit-red);
+            color: var(--white);
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        header p {
+            margin: 5px 0 0;
+            font-size: 1.1em;
+            font-style: italic;
+        }
+
+        .container {
+            width: 85%;
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .section {
+            background-color: var(--white);
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .section h3 {
+            border-bottom: 3px solid var(--vit-blue);
+            color: var(--vit-red);
+            padding-bottom: 5px;
+            margin-top: 0;
+            font-size: 1.6em;
+        }
+
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .details-table th, .details-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px dashed var(--light-grey);
+        }
+
+        .details-table th {
+            background-color: #e0e0e0;
+            width: 30%;
+            font-weight: bold;
+            color: var(--dark-text);
+        }
+
+        .programs-list {
+            columns: 2;
+            column-gap: 40px;
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+
+        .programs-list li {
+            margin-bottom: 5px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 15px 0;
+            background-color: var(--vit-red);
+            color: var(--white);
+            font-size: 0.9em;
+            margin-top: 40px;
+        }
+
+        .register-box {
+            background-color: #e6f0ff;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid var(--vit-blue);
+        }
+
+        .register-box p {
+             font-size: 1.2em;
+             font-weight: 600;
+             margin-bottom: 20px;
+             color: var(--dark-text);
+        }
+
+        .register-box a {
+            display: inline-block;
+            background-color: var(--vit-blue); 
+            color: var(--white);
+            padding: 15px 40px;
+            text-decoration: none;
+            font-size: 1.3em;
+            font-weight: bold;
+            border-radius: 4px;
+            border: 2px solid var(--vit-blue);
+            transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 77, 153, 0.3); 
+        }
+
+        .register-box a:hover {
+            background-color: var(--vit-red);
+            border-color: var(--vit-red);
+            box-shadow: 0 6px 15px rgba(139, 0, 0, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>VIT-AP University</h1>
+        <p>Apply Knowledge. Improve Life. | Amaravati, Andhra Pradesh</p>
+    </header>
+
+    <div class="container">
+
+        <div class="register-box">
+            <p>Ready to start your journey at VIT-AP?</p>
+            <a href="registration.html">Register Now for Admissions!</a>
+        </div>
+        <div class="section">
+            <h3>📝 University Overview</h3>
+            <p>VIT-AP University, established in 2017, is a state private university located in the capital region of Andhra Pradesh. Part of the prestigious Vellore Institute of Technology (VIT) group, VIT-AP aims to provide world-class education, research, and innovation in a vibrant campus environment.</p>
+            <p>The campus is known for its modern infrastructure, including the Sarvepalli Radhakrishnan Block (AB1), Mahatma Gandhi Block (Central Block), and APJ Abdul Kalam Block (AB2), spanning over 200 acres.</p>
+        </div>
+
+        <div class="section">
+            <h3>📊 Key Details</h3>
+            <table class="details-table">
+                <tr>
+                    <th>Established</th>
+                    <td>2017</td>
+                </tr>
+                <tr>
+                    <th>Location</th>
+                    <td>Amaravati, Andhra Pradesh, India</td>
+                </tr>
+                <tr>
+                    <th>Accreditation</th>
+                    <td>UGC, AICTE, NAAC Accredited</td>
+                </tr>
+                <tr>
+                    <th>Campus Size</th>
+                    <td>Approx. 200 Acres</td>
+                </tr>
+                <tr>
+                    <th>Flagship Program</th>
+                    <td>B.Tech (Bachelor of Technology)</td>
+                </tr>
+                <tr>
+                    <th>Admission through</th>
+                    <td>VITEEE (VIT Engineering Entrance Exam) / AP EAPCET</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <h3>🎓 Academic Schools & Programs</h3>
+            <p>VIT-AP offers a variety of undergraduate, postgraduate, and doctoral programs across various disciplines.</p>
+            <ul class="programs-list">
+                <li>School of Computer Science and Engineering (SCOPE)</li>
+                <li>School of Electronics Engineering (SENSE)</li>
+                <li>School of Mechanical Engineering (SMEC)</li>
+                <li>VIT-AP School of Business (VSB)</li>
+                <li>VIT-AP School of Law (VSL)</li>
+                <li>School of Advanced Sciences (SAS)</li>
+                <li>School of Social Sciences and Humanities (VISH)</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h3>🔬 Research and Innovation</h3>
+            <p>The university strongly focuses on research, encouraging students and faculty to engage in cutting-edge projects and interdisciplinary collaboration. Facilities like the Engineering Clinic provide students with hands-on, practical application of their curriculum.</p>
+        </div>
+
+    </div>
+
+    <footer>
+        &copy; 2025 VIT-AP University (Data is illustrative and for demonstration purposes only)
+    </footer>
+
+</body>
+</html>

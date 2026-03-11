@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration | VIT-AP</title>
+    
+    <style>
+        :root {
+            --vit-red: #8B0000;
+            --vit-blue: #004d99;
+            --light-grey: #f4f4f4;
+            --dark-text: #333;
+            --white: #fff;
+            --error-color: #e74c3c;
+            --border-color: #cccccc;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-grey);
+            color: var(--dark-text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--vit-red);
+            color: var(--white);
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        header p {
+            margin: 5px 0 0;
+            font-size: 1.1em;
+            font-style: italic;
+        }
+
+        .container {
+            width: 85%;
+            max-width: 500px;
+            margin: 40px auto;
+            flex: 1;
+        }
+
+        .section {
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-top: 5px solid var(--vit-blue);
+        }
+
+        .section h3 {
+            border-bottom: 3px solid var(--vit-blue);
+            color: var(--vit-red);
+            padding-bottom: 10px;
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 1.6em;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--dark-text);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--vit-blue);
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 77, 153, 0.2);
+        }
+
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn-register {
+            background-color: var(--vit-blue);
+            color: var(--white);
+        }
+
+        .btn-register:hover {
+            background-color: #003366;
+        }
+
+        .btn-home {
+            background-color: var(--white);
+            color: var(--vit-red);
+            border: 2px solid var(--vit-red);
+        }
+
+        .btn-home:hover {
+            background-color: var(--vit-red);
+            color: var(--white);
+        }
+
+        .error {
+            color: var(--error-color);
+            font-size: 0.85em;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px 0;
+            background-color: var(--vit-red);
+            color: var(--white);
+            font-size: 0.9em;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>VIT-AP University</h1>
+        <p>Apply Knowledge. Improve Life. | Amaravati, Andhra Pradesh</p>
+    </header>
+
+    <div class="container">
+        <div class="section">
+            <h3>📝 Student Registration</h3>
+            
+            <form id="registrationForm">
+                
+                <div class="form-group">
+                    <label for="regNumber">Registration Number:</label>
+                    <input type="text" id="regNumber" placeholder="e.g. 23BCE8930" required>
+                    <div class="error" id="regError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="studentName">Full Name:</label>
+                    <input type="text" id="studentName" placeholder="Enter your full name" required>
+                    <div class="error" id="nameError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email ID:</label>
+                    <input type="email" id="email" placeholder="e.g. student@vitap.ac.in" required>
+                    <div class="error" id="emailError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number (10 digits):</label>
+                    <input type="tel" id="phone" placeholder="e.g. 9876543210" required>
+                    <div class="error" id="phoneError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password (Min 6 characters):</label>
+                    <input type="password" id="password" placeholder="Create a strong password" required>
+                    <div class="error" id="passwordError"></div>
+                </div>
+
+                <div class="btn-container">
+                    <button type="submit" class="btn-register">Register</button>
+                    
+                    <button type="button" class="btn-home" onclick="window.location.href='vitap.html'">Return to Home Page</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <footer>
+        &copy; 2025 VIT-AP University (Data is illustrative and for demonstration purposes only)
+    </footer>
+
+    <script src="script.js"></script> 
+</body>
+</html>

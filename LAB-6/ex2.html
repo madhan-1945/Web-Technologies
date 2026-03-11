@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Athena Library System | XML Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* --- CLASSIC PROFESSIONAL CSS --- */
+        :root {
+            --primary: #2c3e50;       /* Dark Slate */
+            --accent: #c0392b;        /* Deep Red */
+            --gold: #d4ac0d;          /* Library Gold */
+            --paper: #fdfbf7;         /* Off-white paper */
+            --text-main: #2c3e50;
+            --text-light: #7f8c8d;
+            --border: #dcdde1;
+            --available: #27ae60;     /* Green */
+            --out: #e67e22;           /* Orange */
+            --shadow: 0 4px 6px rgba(0,0,0,0.08);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #ecf0f1;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        /* Main Container */
+        .library-container {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--paper);
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-top: 6px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        header h1 {
+            font-family: 'Merriweather', serif;
+            font-weight: 900;
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-family: 'Merriweather', serif;
+            font-style: italic;
+            font-size: 0.9rem;
+            color: #bdc3c7;
+        }
+
+        /* Content Layout */
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 500px;
+        }
+
+        /* Sidebar (Add Book) */
+        .sidebar {
+            background-color: #f4f6f7;
+            padding: 2rem;
+            border-right: 1px solid var(--border);
+        }
+
+        .sidebar h3 {
+            font-family: 'Merriweather', serif;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            border-bottom: 2px solid var(--gold);
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+
+        .form-group { margin-bottom: 1.2rem; }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-main);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-family: 'Open Sans', sans-serif;
+            transition: border 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            border-left: 4px solid var(--primary);
+        }
+
+        button.btn-add {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: background 0.3s;
+            margin-top: 1rem;
+        }
+
+        button.btn-add:hover { background-color: #34495e; }
+
+        /* Main Area (Table) */
+        .main-view { padding: 2rem; }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .toolbar h3 { font-family: 'Merriweather', serif; color: var(--text-main); }
+
+        .refresh-btn {
+            background: none;
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            color: var(--text-light);
+            transition: all 0.2s;
+        }
+        .refresh-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        thead {
+            background-color: #ecf0f1;
+            border-bottom: 2px solid var(--border);
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 15px;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: 'Merriweather', serif;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: #fbfcfc; }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .status-avail { background-color: rgba(39, 174, 96, 0.15); color: var(--available); }
+        .status-out { background-color: rgba(230, 126, 34, 0.15); color: var(--out); }
+
+        /* Action Buttons */
+        .btn-action {
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 5px;
+            transition: opacity 0.2s;
+        }
+        
+        .btn-toggle { background-color: var(--primary); color: white; }
+        .btn-delete { background-color: #e74c3c; color: white; }
+        .btn-action:hover { opacity: 0.9; }
+
+        /* Notifications */
+        .notification {
+            padding: 15px;
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+        .notif-error { background-color: #e74c3c; }
+
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        @media (max-width: 768px) {
+            .content-wrapper { grid-template-columns: 1fr; }
+            .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="library-container">
+    <header>
+        <h1>Athena Library</h1>
+        <p>Book Management System</p>
+    </header>
+    
+    <div id="notification" class="notification"></div>
+
+    <div class="content-wrapper">
+        
+        <aside class="sidebar">
+            <h3>New Acquisition</h3>
+            <form id="addBookForm">
+                <div class="form-group">
+                    <label for="bookTitle">Book Title</label>
+                    <input type="text" id="bookTitle" placeholder="e.g. The Great Gatsby" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="bookAuthor">Author</label>
+                    <input type="text" id="bookAuthor" placeholder="e.g. F. Scott Fitzgerald" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="bookStatus">Initial Status</label>
+                    <select id="bookStatus">
+                        <option value="Available">Available</option>
+                        <option value="Checked Out">Checked Out</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-add">Add to Catalog</button>
+            </form>
+        </aside>
+
+        <main class="main-view">
+            <div class="toolbar">
+                <h3>Catalog Index</h3>
+                <button class="refresh-btn" onclick="libraryApp.loadBooks()">↻ Sync XML</button>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th width="10%">ID</th>
+                        <th width="35%">Title</th>
+                        <th width="25%">Author</th>
+                        <th width="15%">Status</th>
+                        <th width="15%">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="bookTableBody">
+                    </tbody>
+            </table>
+        </main>
+    </div>
+</div>
+
+<script>
+/**
+ * --- 1. XML BACKEND SIMULATION ---
+ * Simulates a local 'books.xml' file using browser Blob storage.
+ */
+class XMLBackend {
+    constructor() {
+        // Initial Seed Data
+        this.rawXML = `<?xml version="1.0" encoding="UTF-8"?>
+<library>
+    <book>
+        <id>1001</id>
+        <title>To Kill a Mockingbird</title>
+        <author>Harper Lee</author>
+        <status>Available</status>
+    </book>
+    <book>
+        <id>1002</id>
+        <title>1984</title>
+        <author>George Orwell</author>
+        <status>Checked Out</status>
+    </book>
+    <book>
+        <id>1003</id>
+        <title>Pride and Prejudice</title>
+        <author>Jane Austen</author>
+        <status>Available</status>
+    </book>
+</library>`;
+        
+        this.blobUrl = null;
+        this.parser = new DOMParser();
+        this.serializer = new XMLSerializer();
+        
+        // Initialize the first blob
+        this.updateBlob();
+    }
+
+    // Creates a URL that acts as the file path for AJAX
+    updateBlob() {
+        if (this.blobUrl) URL.revokeObjectURL(this.blobUrl);
+        const blob = new Blob([this.rawXML], {type: "text/xml"});
+        this.blobUrl = URL.createObjectURL(blob);
+    }
+
+    // Returns the URL for AJAX requests
+    getUrl() {
+        return this.blobUrl;
+    }
+
+    // "Writes" to the virtual file
+    saveXML(xmlDoc) {
+        this.rawXML = this.serializer.serializeToString(xmlDoc);
+        this.updateBlob();
+    }
+}
+
+/**
+ * --- 2. LIBRARY APPLICATION LOGIC ---
+ */
+class LibraryApp {
+    constructor(backend) {
+        this.backend = backend;
+        this.tableBody = document.getElementById('bookTableBody');
+        this.notifEl = document.getElementById('notification');
+        
+        // Bind form submit
+        document.getElementById('addBookForm').addEventListener('submit', (e) => this.handleAdd(e));
+        
+        // Initial Load
+        this.loadBooks();
+    }
+
+    // --- AJAX GET REQUEST ---
+    async loadBooks() {
+        try {
+            // Using Fetch API to simulate AJAX request to file
+            const response = await fetch(this.backend.getUrl());
+            if (!response.ok) throw new Error("Failed to load XML database");
+            
+            const xmlText = await response.text();
+            
+            // Parse XML String to DOM
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+            
+            this.renderTable(xmlDoc);
+            
+        } catch (error) {
+            this.showNotification(error.message, true);
+        }
+    }
+
+    // --- DOM MANIPULATION: RENDER ---
+    renderTable(xmlDoc) {
+        this.tableBody.innerHTML = ''; // Clear current view
+        
+        const books = xmlDoc.getElementsByTagName("book");
+        
+        if (books.length === 0) {
+            this.tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;">Library is empty.</td></tr>';
+            return;
+        }
+
+        // Iterate backward to show newest first (optional aesthetic choice)
+        for (let i = 0; i < books.length; i++) {
+            const bookNode = books[i];
+            
+            // Extract text content safely
+            const id = bookNode.getElementsByTagName("id")[0]?.textContent || "N/A";
+            const title = bookNode.getElementsByTagName("title")[0]?.textContent || "Unknown";
+            const author = bookNode.getElementsByTagName("author")[0]?.textContent || "Unknown";
+            const status = bookNode.getElementsByTagName("status")[0]?.textContent || "Unknown";
+
+            // Create HTML Row
+            const row = document.createElement('tr');
+            
+            // Status styling logic
+            const statusClass = status === 'Available' ? 'status-avail' : 'status-out';
+            const actionLabel = status === 'Available' ? 'Check Out' : 'Return';
+
+            row.innerHTML = `
+                <td><strong>#${id}</strong></td>
+                <td>${title}</td>
+                <td>${author}</td>
+                <td><span class="status-badge ${statusClass}">${status}</span></td>
+                <td>
+                    <button class="btn-action btn-toggle" onclick="libraryApp.toggleStatus(${id})">${actionLabel}</button>
+                    <button class="btn-action btn-delete" onclick="libraryApp.deleteBook(${id})">Remove</button>
+                </td>
+            `;
+            
+            this.tableBody.appendChild(row);
+        }
+    }
+
+    // --- CRUD: ADD BOOK (XML DOM CREATION) ---
+    async handleAdd(e) {
+        e.preventDefault();
+        const title = document.getElementById('bookTitle').value;
+        const author = document.getElementById('bookAuthor').value;
+        const status = document.getElementById('bookStatus').value;
+
+        // 1. Fetch current XML
+        const xmlDoc = await this.getXmlDoc();
+        
+        // 2. Generate ID (Max + 1)
+        const books = xmlDoc.getElementsByTagName("book");
+        let maxId = 1000;
+        for(let i=0; i<books.length; i++) {
+            const id = parseInt(books[i].getElementsByTagName("id")[0].textContent);
+            if(id > maxId) maxId = id;
+        }
+        const newId = maxId + 1;
+
+        // 3. Create Elements
+        const newBook = xmlDoc.createElement("book");
+        
+        const idNode = xmlDoc.createElement("id");
+        idNode.textContent = newId;
+        
+        const titleNode = xmlDoc.createElement("title");
+        titleNode.textContent = title;
+        
+        const authNode = xmlDoc.createElement("author");
+        authNode.textContent = author;
+        
+        const statNode = xmlDoc.createElement("status");
+        statNode.textContent = status;
+
+        // 4. Append to Tree
+        newBook.appendChild(idNode);
+        newBook.appendChild(titleNode);
+        newBook.appendChild(authNode);
+        newBook.appendChild(statNode);
+        
+        xmlDoc.getElementsByTagName("library")[0].appendChild(newBook);
+
+        // 5. Save & Refresh
+        this.backend.saveXML(xmlDoc);
+        this.showNotification("Book added to catalog successfully.");
+        document.getElementById('addBookForm').reset();
+        this.loadBooks();
+    }
+
+    // --- CRUD: UPDATE STATUS (XML TRAVERSAL) ---
+    async toggleStatus(id) {
+        const xmlDoc = await this.getXmlDoc();
+        const books = xmlDoc.getElementsByTagName("book");
+        let found = false;
+
+        for(let i=0; i<books.length; i++) {
+            const bookId = books[i].getElementsByTagName("id")[0].textContent;
+            if(bookId == id) {
+                const statusNode = books[i].getElementsByTagName("status")[0];
+                const currentStatus = statusNode.textContent;
+                
+                // Toggle Logic
+                statusNode.textContent = (currentStatus === 'Available') ? 'Checked Out' : 'Available';
+                found = true;
+                break;
+            }
+        }
+
+        if(found) {
+            this.backend.saveXML(xmlDoc);
+            this.loadBooks(); // Refresh UI
+            this.showNotification(`Book #${id} status updated.`);
+        }
+    }
+
+    // --- CRUD: DELETE (XML REMOVAL) ---
+    async deleteBook(id) {
+        if(!confirm("Are you sure you want to remove this book from the catalog?")) return;
+
+        const xmlDoc = await this.getXmlDoc();
+        const root = xmlDoc.getElementsByTagName("library")[0];
+        const books = xmlDoc.getElementsByTagName("book");
+        let found = false;
+
+        for(let i=0; i<books.length; i++) {
+            const bookId = books[i].getElementsByTagName("id")[0].textContent;
+            if(bookId == id) {
+                root.removeChild(books[i]);
+                found = true;
+                break;
+            }
+        }
+
+        if(found) {
+            this.backend.saveXML(xmlDoc);
+            this.loadBooks();
+            this.showNotification(`Book #${id} removed permanently.`);
+        }
+    }
+
+    // Helper: Get XML Doc from Backend
+    async getXmlDoc() {
+        const response = await fetch(this.backend.getUrl());
+        const text = await response.text();
+        return new DOMParser().parseFromString(text, "text/xml");
+    }
+
+    // UI Helper: Notification
+    showNotification(msg, isError = false) {
+        this.notifEl.textContent = msg;
+        this.notifEl.style.display = 'block';
+        this.notifEl.className = isError ? 'notification notif-error' : 'notification';
+        
+        setTimeout(() => {
+            this.notifEl.style.display = 'none';
+        }, 3000);
+    }
+}
+
+// Initialize System
+const backend = new XMLBackend();
+const libraryApp = new LibraryApp(backend);
+
+</script>
+</body>
+</html>

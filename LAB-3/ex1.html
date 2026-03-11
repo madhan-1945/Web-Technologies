@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5 Canvas</title>
+    <style>
+        /* Advanced CSS for Presentation */
+        :root {
+            --bg-color: #f0f2f5;
+            --canvas-bg: #ffffff;
+            --accent-color: #4a90e2;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .canvas-container {
+            padding: 20px;
+            background: var(--canvas-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .canvas-container:hover {
+            transform: translateY(-5px);
+        }
+
+        canvas {
+            border: 2px solid #eee;
+            border-radius: 4px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Canvas Drawing Board</h1>
+
+    <div class="canvas-container">
+        <canvas id="myCanvas" width="500" height="300"></canvas>
+    </div>
+
+    <script>
+        // JavaScript Drawing Logic
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 1. Display a filled rectangle
+        ctx.fillStyle = '#FF5733';
+        ctx.fillRect(50, 50, 150, 80);
+
+        // 2. Display a filled circle
+        ctx.beginPath();
+        ctx.arc(350, 90, 50, 0, Math.PI * 2);
+        ctx.fillStyle = '#2ECC71';
+        ctx.fill();
+        ctx.closePath();
+
+        // 3. Display a straight line
+        ctx.beginPath();
+        ctx.moveTo(50, 200);   // Start point
+        ctx.lineTo(450, 200);  // End point
+        ctx.strokeStyle = '#34495E';
+        ctx.lineWidth = 5;
+        ctx.stroke();
+        ctx.closePath();
+
+        // 4. Display the text "HTML5 Canvas"
+        ctx.font = 'bold 30px Arial';
+        ctx.fillStyle = '#4a90e2';
+        ctx.textAlign = 'center';
+        ctx.fillText('HTML5 Canvas', canvas.width / 2, 260);
+
+    </script>
+</body>
+</html>

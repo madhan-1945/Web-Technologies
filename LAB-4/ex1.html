@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Registration System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --success: #00b894;
+            --error: #d63031;
+            --text: #2d3436;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--text);
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .input-group { margin-bottom: 20px; position: relative; }
+
+        .input-group label {
+            display: block; margin-bottom: 5px; color: #636e72;
+            font-size: 0.9rem; font-weight: 500;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%; padding: 12px 15px;
+            border: 2px solid #dfe6e9; border-radius: 8px;
+            font-size: 1rem; outline: none; transition: all 0.3s ease;
+        }
+
+        /* Validation Colors */
+        .input-group.success input { border-color: var(--success); }
+        .input-group.error input { border-color: var(--error); }
+
+        .input-group i {
+            position: absolute; right: 15px; top: 42px; visibility: hidden;
+        }
+        .input-group.success i.fa-check-circle { visibility: visible; color: var(--success); }
+        .input-group.error i.fa-exclamation-circle { visibility: visible; color: var(--error); }
+
+        small {
+            visibility: hidden; color: var(--error); font-size: 0.8rem;
+            margin-top: 5px; display: block;
+        }
+        .input-group.error small { visibility: visible; }
+
+        .role-badge {
+            padding: 5px 10px; border-radius: 15px; font-size: 0.75rem;
+            color: white; background: var(--primary); margin-left: 10px;
+        }
+
+        .password-strength {
+            height: 5px; background: #dfe6e9; margin-top: 8px;
+            border-radius: 5px; overflow: hidden;
+        }
+        .strength-bar { height: 100%; width: 0%; transition: width 0.3s; }
+
+        button {
+            width: 100%; padding: 15px; background: var(--primary);
+            color: white; border: none; border-radius: 8px;
+            font-size: 1.1rem; cursor: pointer; transition: background 0.3s;
+            margin-top: 10px;
+        }
+        button:hover { background: #5649c0; }
+        
+        /* Popup for Success Message */
+        .success-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: none;
+            justify-content: center; align-items: center; z-index: 1000;
+        }
+        .success-box {
+            background: white; padding: 30px; border-radius: 15px;
+            text-align: center; animation: popIn 0.4s ease;
+        }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; }}
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Join Us <span id="roleBadge" class="role-badge">Student</span></h2>
+    
+    <form id="form" novalidate>
+        <div class="input-group">
+            <label>Select Role</label>
+            <select id="role" onchange="updateRoleSettings()">
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Full Name</label>
+            <input type="text" id="username" placeholder="Duo Lingo">
+            <i class="fas fa-check-circle"></i>
+            <i class="fas fa-exclamation-circle"></i>
+            <small>Name must be at least 3 characters</small>
+        </div>
+
+        <div class="input-group">
+            <label>Email</label>
+            <input type="email" id="email" placeholder="duolingo@example.com">
+            <i class="fas fa-check-circle"></i>
+            <i class="fas fa-exclamation-circle"></i>
+            <small>Enter a valid email address</small>
+        </div>
+
+        <div class="input-group">
+            <label>Age</label>
+            <input type="number" id="age" placeholder="Age">
+            <i class="fas fa-check-circle"></i>
+            <i class="fas fa-exclamation-circle"></i>
+            <small>Error message</small>
+        </div>
+
+        <div id="dynamicContainer"></div>
+
+        <div class="input-group">
+            <label>Skills (comma separated)</label>
+            <input type="text" id="skills" placeholder="e.g. Coding">
+            <i class="fas fa-check-circle"></i>
+            <i class="fas fa-exclamation-circle"></i>
+            <small>Skills cannot be empty</small>
+        </div>
+
+        <div class="input-group">
+            <label>Password <span style="font-size:0.8em; color:#888" id="passRequirement"></span></label>
+            <input type="password" id="password" placeholder="Password">
+            <i class="fas fa-check-circle"></i>
+            <i class="fas fa-exclamation-circle"></i>
+            <div class="password-strength"><div class="strength-bar" id="strengthBar"></div></div>
+            <small>Error message</small>
+        </div>
+
+        <div class="input-group">
+            <label>Confirm Password</label>
+            <input type="password" id="cpassword" placeholder="Confirm Password">
+            <i class="fas fa-check-circle"></i>
+            <i class="fas fa-exclamation-circle"></i>
+            <small>Passwords do not match</small>
+        </div>
+
+        <button type="submit" id="submitBtn">Register</button>
+    </form>
+</div>
+
+<div class="success-overlay" id="successOverlay">
+    <div class="success-box">
+        <i class="fas fa-check-circle" style="color: #00b894; font-size: 3rem; margin-bottom: 15px;"></i>
+        <h3>Record Saved!</h3>
+        <p>Your registration was successful.</p>
+        <button onclick="closePopup()" style="margin-top: 15px; width: auto; padding: 10px 30px;">OK</button>
+    </div>
+</div>
+
+<script>
+    const roleRules = {
+        student: { minAge: 10, passRegex: /.{6,}/, dynamicLabel: "Student ID", dynamicId: "studentId", color: "#00b894" },
+        teacher: { minAge: 22, passRegex: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/, dynamicLabel: "Department", dynamicId: "department", color: "#0984e3" },
+        admin: { minAge: 18, passRegex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/, dynamicLabel: "Admin Access Key", dynamicId: "adminKey", color: "#d63031" }
+    };
+
+    const form = document.getElementById('form');
+    const roleSelect = document.getElementById('role');
+    const dynamicContainer = document.getElementById('dynamicContainer');
+    let currentRole = 'student';
+
+    document.addEventListener('DOMContentLoaded', updateRoleSettings);
+
+    function updateRoleSettings() {
+        currentRole = roleSelect.value;
+        const config = roleRules[currentRole];
+        
+        document.getElementById('roleBadge').innerText = currentRole.toUpperCase();
+        document.getElementById('roleBadge').style.backgroundColor = config.color;
+        document.getElementById('passRequirement').innerText = currentRole === 'admin' ? "(Strong: 12+ chars)" : "(Min 6 chars)";
+
+        dynamicContainer.innerHTML = `
+            <div class="input-group dynamic-field">
+                <label>${config.dynamicLabel}</label>
+                <input type="text" id="${config.dynamicId}" placeholder="Enter ${config.dynamicLabel}">
+                <i class="fas fa-check-circle"></i>
+                <i class="fas fa-exclamation-circle"></i>
+                <small>This field is required</small>
+            </div>
+        `;
+    }
+
+    // Main Validation Logic
+    function validateInput(input) {
+        const val = input.value.trim();
+        const config = roleRules[currentRole];
+        let isValid = true;
+        let error = "";
+
+        if (input.id === 'username') { isValid = val.length >= 3; }
+        else if (input.id === 'email') { isValid = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/.test(val); }
+        else if (input.id === 'age') { isValid = val >= config.minAge && val !== ""; error = `Min age: ${config.minAge}`; }
+        else if (input.id === 'skills') { isValid = val.length > 0; }
+        else if (input.id === 'password') { 
+            isValid = config.passRegex.test(val); 
+            updateStrength(val);
+            error = "Password too weak for this role";
+        }
+        else if (input.id === 'cpassword') { isValid = val === document.getElementById('password').value && val !== ""; }
+        else if (input.parentElement.classList.contains('dynamic-field')) { isValid = val.length > 0; }
+
+        setStatus(input, isValid, error);
+        return isValid;
+    }
+
+    function setStatus(input, isValid, msg) {
+        const group = input.parentElement;
+        const small = group.querySelector('small');
+        if (isValid) {
+            group.className = 'input-group success';
+        } else {
+            group.className = 'input-group error';
+            if(msg) small.innerText = msg;
+        }
+    }
+
+    function updateStrength(val) {
+        const bar = document.getElementById('strengthBar');
+        let strength = 0;
+        if(val.length > 5) strength++;
+        if(val.length > 8) strength++;
+        if(/[A-Z]/.test(val)) strength++;
+        if(/[0-9]/.test(val)) strength++;
+        bar.style.width = (strength/4)*100 + '%';
+        bar.style.backgroundColor = strength < 2 ? '#d63031' : '#00b894';
+    }
+
+    // Real-time check
+    form.addEventListener('input', (e) => {
+        if(e.target.tagName === 'INPUT') validateInput(e.target);
+    });
+
+    // Final Submit Check
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const inputs = form.querySelectorAll('input');
+        let allValid = true;
+
+        inputs.forEach(input => {
+            if (!validateInput(input)) {
+                allValid = false;
+            }
+        });
+
+        if (allValid) {
+            document.getElementById('successOverlay').style.display = 'flex';
+        } else {
+            // Optional: Shake animation or alert
+            // alert("Please fix the red fields!");
+        }
+    });
+
+    function closePopup() {
+        document.getElementById('successOverlay').style.display = 'none';
+        form.reset();
+        document.querySelectorAll('.input-group').forEach(g => g.className = 'input-group');
+        document.getElementById('strengthBar').style.width = '0';
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyCast Weather Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- PROFESSIONAL DASHBOARD CSS --- */
+        :root {
+            --primary: #3b82f6;      /* Blue 500 */
+            --primary-dark: #1d4ed8; /* Blue 700 */
+            --bg-body: #f1f5f9;      /* Slate 100 */
+            --surface: #ffffff;
+            --text-main: #1e293b;    /* Slate 800 */
+            --text-secondary: #64748b; /* Slate 500 */
+            --error: #ef4444;
+            --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Dashboard Container */
+        .dashboard {
+            background: var(--surface);
+            width: 100%;
+            max-width: 450px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        /* Header Section */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            padding: 2rem;
+            color: white;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        /* Search Section */
+        .search-container {
+            padding: 1.5rem;
+            position: relative;
+            margin-top: -30px; /* Overlap effect */
+        }
+
+        .input-group {
+            display: flex;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            background: white;
+            overflow: hidden;
+        }
+
+        input {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+
+        button {
+            background: white;
+            border: none;
+            padding: 0 20px;
+            cursor: pointer;
+            color: var(--primary);
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        button:hover { background: #f8fafc; }
+
+        /* Weather Content Area */
+        .weather-content {
+            padding: 0 1.5rem 2rem;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Initial State */
+        .placeholder-text {
+            color: var(--text-secondary);
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        /* Weather Display (Hidden by default) */
+        .weather-data {
+            display: none;
+            width: 100%;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .city-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--text-main);
+        }
+
+        .weather-icon {
+            font-size: 4rem;
+            margin: 1rem 0;
+            display: inline-block;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+
+        .temperature {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1;
+        }
+
+        .condition {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            text-transform: capitalize;
+        }
+
+        /* Details Grid */
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .detail-card {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* Error Message */
+        .error-msg {
+            background-color: #fef2f2;
+            color: var(--error);
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #fee2e2;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <div class="header">
+            <h1>SkyCast</h1>
+            <p>Live Weather Dashboard</p>
+        </div>
+
+        <div class="search-container">
+            <div class="input-group">
+                <input type="text" id="cityInput" placeholder="Enter city name (e.g. London)" autocomplete="off">
+                <button id="searchBtn">Search</button>
+            </div>
+        </div>
+
+        <div class="weather-content" id="contentArea">
+            
+            <div id="placeholder" class="placeholder-text">
+                Enter a city above to see the current weather forecast.
+            </div>
+
+            <div id="loader" class="spinner"></div>
+
+            <div id="errorBox" class="error-msg"></div>
+
+            <div id="weatherDisplay" class="weather-data">
+                <h2 class="city-title" id="displayCity">City Name</h2>
+                
+                <div class="weather-icon" id="displayIcon">☀️</div>
+                
+                <div class="temperature"><span id="displayTemp">0</span>°C</div>
+                <div class="condition" id="displayCondition">Clear Sky</div>
+
+                <div class="details-grid">
+                    <div class="detail-card">
+                        <div class="detail-label">Humidity</div>
+                        <div class="detail-value"><span id="displayHumidity">0</span>%</div>
+                    </div>
+                    <div class="detail-card">
+                        <div class="detail-label">Wind Speed</div>
+                        <div class="detail-value"><span id="displayWind">0</span> km/h</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<script>
+    /**
+     * --- CONFIGURATION & STATE ---
+     */
+    
+    // We use Open-Meteo because it is free and does not require an API Key.
+    // 1. Geocoding API: Converts City Name -> Latitude/Longitude
+    const GEO_API_URL = "https://geocoding-api.open-meteo.com/v1/search";
+    
+    // 2. Weather API: Uses Lat/Lon -> Weather Data
+    const WEATHER_API_URL = "https://api.open-meteo.com/v1/forecast";
+
+    // Cache variable to store the last successful result
+    let weatherCache = {
+        city: null,
+        data: null
+    };
+
+    /**
+     * --- DOM ELEMENTS ---
+     */
+    const cityInput = document.getElementById('cityInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const placeholder = document.getElementById('placeholder');
+    const loader = document.getElementById('loader');
+    const errorBox = document.getElementById('errorBox');
+    const weatherDisplay = document.getElementById('weatherDisplay');
+
+    // Display Elements
+    const elCity = document.getElementById('displayCity');
+    const elTemp = document.getElementById('displayTemp');
+    const elCondition = document.getElementById('displayCondition');
+    const elHumidity = document.getElementById('displayHumidity');
+    const elWind = document.getElementById('displayWind');
+    const elIcon = document.getElementById('displayIcon');
+
+    /**
+     * --- EVENT LISTENERS ---
+     */
+    searchBtn.addEventListener('click', () => {
+        const city = cityInput.value.trim();
+        if (city) fetchWeatherData(city);
+    });
+
+    // Allow "Enter" key to search
+    cityInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const city = cityInput.value.trim();
+            if (city) fetchWeatherData(city);
+        }
+    });
+
+    /**
+     * --- CORE LOGIC: AJAX FETCH ---
+     */
+    async function fetchWeatherData(city) {
+        // 1. Check Cache (Optional optimization)
+        if (weatherCache.city && weatherCache.city.toLowerCase() === city.toLowerCase()) {
+            console.log("Serving from cache...");
+            updateUI(weatherCache.data, weatherCache.city);
+            return;
+        }
+
+        // 2. Reset UI to Loading State
+        showLoading();
+
+        try {
+             //  - This helps visualize the two-step API call below.
+            
+            // --- STEP 1: Get Coordinates (Geocoding) ---
+            const geoUrl = `${GEO_API_URL}?name=${city}&count=1&language=en&format=json`;
+            const geoResponse = await fetch(geoUrl);
+            
+            if (!geoResponse.ok) throw new Error("Geocoding service unavailable.");
+            
+            const geoData = await geoResponse.json();
+
+            // validation: Did we find the city?
+            if (!geoData.results || geoData.results.length === 0) {
+                throw new Error(`City "${city}" not found.`);
+            }
+
+            const { latitude, longitude, name, country } = geoData.results[0];
+            const fullName = `${name}, ${country}`;
+
+            // --- STEP 2: Get Weather Data ---
+            // We request: temperature, humidity, weathercode, windspeed
+            const weatherUrl = `${WEATHER_API_URL}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m`;
+            
+            const weatherResponse = await fetch(weatherUrl);
+            if (!weatherResponse.ok) throw new Error("Weather service unavailable.");
+
+            const weatherData = await weatherResponse.json();
+
+            // --- STEP 3: Process & Cache ---
+            const current = weatherData.current;
+            
+            const processedData = {
+                temp: current.temperature_2m,
+                humidity: current.relative_humidity_2m,
+                wind: current.wind_speed_10m,
+                code: current.weather_code,
+                conditionText: decodeWeatherCode(current.weather_code).text,
+                icon: decodeWeatherCode(current.weather_code).icon
+            };
+
+            // Save to cache
+            weatherCache = {
+                city: city,
+                data: processedData,
+                displayName: fullName
+            };
+
+            // Update UI
+            updateUI(processedData, fullName);
+
+        } catch (error) {
+            showError(error.message);
+        }
+    }
+
+    /**
+     * --- UI UPDATES ---
+     */
+    function updateUI(data, cityName) {
+        // Hide Loader, Show Data
+        loader.style.display = 'none';
+        placeholder.style.display = 'none';
+        errorBox.style.display = 'none';
+        weatherDisplay.style.display = 'block';
+
+        // Set Values
+        elCity.textContent = cityName;
+        elTemp.textContent = Math.round(data.temp);
+        elCondition.textContent = data.conditionText;
+        elHumidity.textContent = data.humidity;
+        elWind.textContent = data.wind;
+        elIcon.textContent = data.icon;
+    }
+
+    function showLoading() {
+        weatherDisplay.style.display = 'none';
+        placeholder.style.display = 'none';
+        errorBox.style.display = 'none';
+        loader.style.display = 'block';
+    }
+
+    function showError(message) {
+        loader.style.display = 'none';
+        weatherDisplay.style.display = 'none';
+        placeholder.style.display = 'none';
+        errorBox.style.display = 'block';
+        errorBox.textContent = message;
+    }
+
+    /**
+     * --- HELPER: WMO WEATHER CODES ---
+     * Open-Meteo returns a numeric code (0-99). We map this to text and emojis.
+     */
+    function decodeWeatherCode(code) {
+        // Simple mapping for common WMO codes
+        if (code === 0) return { text: "Clear Sky", icon: "☀️" };
+        if (code >= 1 && code <= 3) return { text: "Partly Cloudy", icon: "⛅" };
+        if (code >= 45 && code <= 48) return { text: "Foggy", icon: "🌫️" };
+        if (code >= 51 && code <= 55) return { text: "Drizzle", icon: "🌦️" };
+        if (code >= 61 && code <= 65) return { text: "Rain", icon: "🌧️" };
+        if (code >= 71 && code <= 77) return { text: "Snow", icon: "❄️" };
+        if (code >= 80 && code <= 82) return { text: "Showers", icon: "☔" };
+        if (code >= 95 && code <= 99) return { text: "Thunderstorm", icon: "⚡" };
+        return { text: "Unknown", icon: "🌡️" };
+    }
+
+</script>
+
+</body>
+</html>

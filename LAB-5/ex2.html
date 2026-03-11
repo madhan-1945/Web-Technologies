@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Product Search</title>
+    <style>
+        /* --- PROFESSIONAL CSS THEME --- */
+        :root {
+            --bg-body: #f8f9fa;
+            --bg-card: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #6c757d;
+            --accent-color: #3498db; /* Professional Blue */
+            --accent-hover: #2980b9;
+            --border-color: #e9ecef;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 60px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+        }
+
+        /* HEADER & SEARCH SECTION */
+        .search-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-weight: 700;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            color: #1a252f;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 30px;
+        }
+
+        .search-wrapper {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 18px 24px;
+            padding-left: 50px; /* Space for icon */
+            font-size: 1.1rem;
+            border: 2px solid transparent;
+            border-radius: 50px;
+            background: var(--bg-card);
+            box-shadow: var(--shadow-md);
+            outline: none;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+        }
+
+        input[type="text"]:focus {
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent-color);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        /* LOADING SPINNER */
+        .spinner {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        /* RESULTS GRID */
+        .results-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        /* PRODUCT CARD */
+        .product-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .category-badge {
+            align-self: flex-start;
+            background-color: #e3f2fd;
+            color: #1565c0;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .product-name {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #2d3436;
+        }
+
+        .product-price {
+            font-size: 1.25rem;
+            color: #27ae60; /* Professional Green for money */
+            font-weight: 600;
+            margin-top: auto; /* Pushes price to bottom */
+            padding-top: 15px;
+        }
+
+        /* STATE MESSAGES */
+        .message-box {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            background: white;
+            border-radius: 12px;
+            border: 1px dashed var(--border-color);
+        }
+
+        .error-msg { color: #e74c3c; background: #fdecea; border-color: #fadbd8; }
+
+        @keyframes spin { 100% { transform: translateY(-50%) rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="search-header">
+            <h1>Product Inventory</h1>
+            <p class="subtitle">Real-time search across our global catalog</p>
+            
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Search by name, category, or keyword..." autocomplete="off">
+                <div class="spinner" id="loader"></div>
+            </div>
+        </div>
+
+        <div id="resultsArea" class="results-container">
+            <div class="message-box">Start typing to search products...</div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * --- 1. MOCK DATA & VIRTUAL FILE SETUP ---
+         * We create a local Blob to strictly serve as our "JSON File" for the Fetch API.
+         */
+        const productData = [
+            { id: 1, name: "Ergonomic Office Chair", price: 299.99, category: "Furniture" },
+            { id: 2, name: "Wireless Mechanical Keyboard", price: 129.50, category: "Electronics" },
+            { id: 3, name: "4K Ultra HD Monitor", price: 450.00, category: "Electronics" },
+            { id: 4, name: "Smart Noise-Cancelling Headphones", price: 199.99, category: "Audio" },
+            { id: 5, name: "Ceramic Coffee Mug Set", price: 35.00, category: "Home & Kitchen" },
+            { id: 6, name: "Leather Laptop Satchel", price: 89.95, category: "Accessories" },
+            { id: 7, name: "Smart Home Hub", price: 79.99, category: "Smart Home" },
+            { id: 8, name: "Adjustable Standing Desk", price: 550.00, category: "Furniture" },
+            { id: 9, name: "Bluetooth Portable Speaker", price: 45.00, category: "Audio" },
+            { id: 10, name: "Stainless Steel Water Bottle", price: 25.00, category: "Lifestyle" }
+        ];
+
+        // Create the Virtual JSON File
+        const blob = new Blob([JSON.stringify(productData)], {type: 'application/json'});
+        const JSON_ENDPOINT = URL.createObjectURL(blob);
+
+
+        /**
+         * --- 2. JAVASCRIPT LOGIC ---
+         */
+        
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const resultsArea = document.getElementById('resultsArea');
+        const loader = document.getElementById('loader');
+
+        // State
+        let debounceTimer;
+
+        // Event Listener with Debounce
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+
+            // Clear existing timer
+            clearTimeout(debounceTimer);
+
+            // UI Reset if empty
+            if (!query) {
+                renderMessage("Start typing to search products...");
+                loader.style.display = 'none';
+                return;
+            }
+
+            // Show Loading State immediately
+            loader.style.display = 'block';
+
+            // Set new timer (Debouncing: wait 500ms after last keystroke)
+            debounceTimer = setTimeout(() => {
+                fetchProducts(query);
+            }, 500);
+        });
+
+        /**
+         * Core AJAX Function using Fetch API
+         */
+        async function fetchProducts(query) {
+            try {
+                // 1. Fetch from our "server" (the Blob URL)
+                const response = await fetch(JSON_ENDPOINT);
+
+                // 2. Error Handling for HTTP issues
+                if (!response.ok) {
+                    throw new Error(`Server Error: ${response.status}`);
+                }
+
+                // 3. Parse JSON
+                const allProducts = await response.json();
+
+                // 4. Simulate server-side filtering (filtering logic)
+                const lowerQuery = query.toLowerCase();
+                const filtered = allProducts.filter(product => 
+                    product.name.toLowerCase().includes(lowerQuery) || 
+                    product.category.toLowerCase().includes(lowerQuery)
+                );
+
+                // 5. Simulate network latency (optional, for realism)
+                await new Promise(r => setTimeout(r, 400));
+
+                // 6. Update UI
+                loader.style.display = 'none';
+                
+                if (filtered.length > 0) {
+                    renderResults(filtered);
+                } else {
+                    renderMessage("No products found matching your search.");
+                }
+
+            } catch (error) {
+                console.error("Search failed:", error);
+                loader.style.display = 'none';
+                renderMessage("Unable to fetch data. Please try again later.", true);
+            }
+        }
+
+        /**
+         * DOM Rendering Functions
+         */
+        function renderResults(products) {
+            resultsArea.innerHTML = ''; // Clear previous
+
+            products.forEach(product => {
+                // Create Card Element
+                const card = document.createElement('div');
+                card.className = 'product-card';
+
+                // Format Price
+                const formattedPrice = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                }).format(product.price);
+
+                // Populate Content
+                card.innerHTML = `
+                    <span class="category-badge">${product.category}</span>
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-price">${formattedPrice}</div>
+                `;
+
+                resultsArea.appendChild(card);
+            });
+        }
+
+        function renderMessage(text, isError = false) {
+            resultsArea.innerHTML = `
+                <div class="message-box ${isError ? 'error-msg' : ''}">
+                    ${text}
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

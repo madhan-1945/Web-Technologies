@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management Portal</title>
+    <style>
+        /* --- PROFESSIONAL DASHBOARD THEME --- */
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --background: #f1f5f9;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .container { grid-template-columns: 350px 1fr; }
+        }
+
+        /* --- CARD STYLES --- */
+        .card {
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background: #f8fafc;
+        }
+
+        .card-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .card-body { padding: 1.5rem; }
+
+        /* --- FORM STYLES --- */
+        .form-group { margin-bottom: 1rem; }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        
+        .btn-secondary { background: white; border: 1px solid var(--border); color: var(--text-main); margin-top: 0.5rem; }
+        .btn-secondary:hover { background: #f8fafc; }
+
+        /* --- TABLE STYLES --- */
+        .table-responsive { overflow-x: auto; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            background: #f8fafc;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        tr:last-child td { border-bottom: none; }
+        
+        /* Action Buttons in Table */
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            border: none;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-right: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .btn-edit { background: #eff6ff; color: var(--primary); }
+        .btn-edit:hover { background: #dbeafe; }
+        
+        .btn-delete { background: #fef2f2; color: var(--danger); }
+        .btn-delete:hover { background: #fee2e2; }
+
+        /* --- ALERTS & LOADERS --- */
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 2rem auto;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <header style="margin-bottom: 2rem; text-align: center;">
+        <h1 style="color: var(--primary-dark); margin-bottom: 0.5rem;">Student Management System</h1>
+       
+    </header>
+
+    <div class="container">
+        
+        <section class="card">
+            <div class="card-header">
+                <h2 id="formTitle">Add New Student</h2>
+            </div>
+            <div class="card-body">
+                <div id="formAlert" class="alert"></div>
+                
+                <form id="studentForm">
+                    <input type="hidden" id="studentId"> <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" placeholder="e.g. John Doe" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dept">Department</label>
+                        <select id="dept" required>
+                            <option value="">Select Department</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Electrical Eng">Electrical Eng</option>
+                            <option value="Mechanical Eng">Mechanical Eng</option>
+                            <option value="Business Admin">Business Admin</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="marks">Marks (GPA)</label>
+                        <input type="number" id="marks" step="0.1" min="0" max="4.0" placeholder="0.0 - 4.0" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="saveBtn">
+                        <span id="btnText">Save Student</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancelBtn" style="display: none;">Cancel</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Student Records</h2>
+                <button class="action-btn btn-edit" onclick="fetchStudents()">↻ Refresh</button>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <div id="tableLoader" class="loader"></div>
+                <div id="tableAlert" class="alert" style="margin: 1rem;"></div>
+                
+                <div class="table-responsive">
+                    <table id="studentTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Dept</th>
+                                <th>Marks</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            </tbody>
+                    </table>
+                    <div id="emptyState" class="empty-state" style="display: none;">
+                        No students found. Add one to get started.
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+<script>
+    /**
+     * --- 1. MOCK BACKEND API SIMULATION ---
+     * This class simulates a Server/Database interaction.
+     * It uses LocalStorage to persist data between page reloads.
+     */
+    class MockServer {
+        constructor() {
+            // Initialize with seed data if empty
+            if (!localStorage.getItem('students_db')) {
+                const seedData = [
+                    { id: 1, name: 'Alice Johnson', dept: 'Computer Science', marks: 3.8 },
+                    { id: 2, name: 'Bob Smith', dept: 'Electrical Eng', marks: 3.2 }
+                ];
+                localStorage.setItem('students_db', JSON.stringify(seedData));
+            }
+        }
+
+        // Simulate Network Latency
+        async _delay() {
+            return new Promise(resolve => setTimeout(resolve, 600));
+        }
+
+        getDb() {
+            return JSON.parse(localStorage.getItem('students_db'));
+        }
+
+        saveDb(data) {
+            localStorage.setItem('students_db', JSON.stringify(data));
+        }
+
+        // --- CRUD ENDPOINTS ---
+
+        // GET /students
+        async getAll() {
+            await this._delay();
+            return { status: 200, data: this.getDb() };
+        }
+
+        // POST /students
+        async create(student) {
+            await this._delay();
+            const db = this.getDb();
+            const newId = db.length > 0 ? Math.max(...db.map(s => s.id)) + 1 : 1;
+            const newStudent = { ...student, id: newId };
+            
+            db.push(newStudent);
+            this.saveDb(db);
+            return { status: 201, message: "Student created successfully." };
+        }
+
+        // PUT /students/:id
+        async update(id, updatedData) {
+            await this._delay();
+            const db = this.getDb();
+            const index = db.findIndex(s => s.id === parseInt(id));
+
+            if (index === -1) return { status: 404, message: "Student not found." };
+
+            db[index] = { ...db[index], ...updatedData };
+            this.saveDb(db);
+            return { status: 200, message: "Student updated successfully." };
+        }
+
+        // DELETE /students/:id
+        async delete(id) {
+            await this._delay();
+            const db = this.getDb();
+            const filtered = db.filter(s => s.id !== parseInt(id));
+
+            if (db.length === filtered.length) return { status: 404, message: "Student not found." };
+
+            this.saveDb(filtered);
+            return { status: 200, message: "Student deleted successfully." };
+        }
+    }
+
+    const api = new MockServer();
+
+    /**
+     * --- 2. FRONTEND LOGIC ---
+     */
+
+    // State Variables
+    let isEditing = false;
+    let editingId = null;
+
+    // DOM Elements
+    const form = document.getElementById('studentForm');
+    const tableBody = document.getElementById('tableBody');
+    const tableLoader = document.getElementById('tableLoader');
+    const emptyState = document.getElementById('emptyState');
+    const formAlert = document.getElementById('formAlert');
+    const tableAlert = document.getElementById('tableAlert');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const btnText = document.getElementById('btnText');
+    const formTitle = document.getElementById('formTitle');
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', fetchStudents);
+
+    // --- EVENT LISTENERS ---
+    form.addEventListener('submit', handleFormSubmit);
+    cancelBtn.addEventListener('click', resetForm);
+
+    // --- CRUD FUNCTIONS ---
+
+    // 1. READ (Fetch Students)
+    async function fetchStudents() {
+        showLoader(true);
+        tableBody.innerHTML = '';
+        emptyState.style.display = 'none';
+        
+        try {
+            const response = await api.getAll();
+            
+            if (response.status === 200) {
+                renderTable(response.data);
+            } else {
+                showAlert(tableAlert, 'error', 'Failed to fetch data');
+            }
+        } catch (err) {
+            showAlert(tableAlert, 'error', 'Network Error: ' + err.message);
+        } finally {
+            showLoader(false);
+        }
+    }
+
+    // 2. CREATE & UPDATE (Handle Submit)
+    async function handleFormSubmit(e) {
+        e.preventDefault();
+        
+        // Gather Data
+        const studentData = {
+            name: document.getElementById('name').value,
+            dept: document.getElementById('dept').value,
+            marks: parseFloat(document.getElementById('marks').value)
+        };
+
+        // Disable button to prevent double submit
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.disabled = true;
+        btnText.textContent = isEditing ? "Updating..." : "Saving...";
+
+        try {
+            let response;
+            if (isEditing) {
+                // UPDATE REQUEST
+                response = await api.update(editingId, studentData);
+            } else {
+                // CREATE REQUEST
+                response = await api.create(studentData);
+            }
+
+            if (response.status === 200 || response.status === 201) {
+                showAlert(formAlert, 'success', response.message);
+                resetForm();
+                fetchStudents(); // Refresh table
+            } else {
+                showAlert(formAlert, 'error', response.message);
+            }
+        } catch (err) {
+            showAlert(formAlert, 'error', 'Operation failed.');
+        } finally {
+            saveBtn.disabled = false;
+            btnText.textContent = isEditing ? "Update Student" : "Save Student";
+        }
+    }
+
+    // 3. DELETE
+    window.deleteStudent = async function(id) {
+        if (!confirm('Are you sure you want to delete this record?')) return;
+
+        try {
+            const response = await api.delete(id);
+            if (response.status === 200) {
+                showAlert(tableAlert, 'success', response.message);
+                fetchStudents();
+            } else {
+                showAlert(tableAlert, 'error', response.message);
+            }
+        } catch (err) {
+            showAlert(tableAlert, 'error', 'Delete failed.');
+        }
+    }
+
+    // 4. EDIT (Pre-fill Form)
+    window.editStudent = function(id, name, dept, marks) {
+        isEditing = true;
+        editingId = id;
+
+        // Populate Form
+        document.getElementById('studentId').value = id;
+        document.getElementById('name').value = name;
+        document.getElementById('dept').value = dept;
+        document.getElementById('marks').value = marks;
+
+        // Update UI State
+        formTitle.textContent = "Edit Student";
+        btnText.textContent = "Update Student";
+        cancelBtn.style.display = 'inline-block';
+        
+        // Highlight Form
+        document.querySelector('.container').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- HELPER FUNCTIONS ---
+
+    function renderTable(students) {
+        if (students.length === 0) {
+            emptyState.style.display = 'block';
+            return;
+        }
+
+        students.forEach(s => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${s.name}</td>
+                <td><span style="background:#eef2ff; color:#4f46e5; padding:2px 6px; border-radius:4px; font-size:0.8rem;">${s.dept}</span></td>
+                <td>${s.marks.toFixed(1)}</td>
+                <td style="text-align: right;">
+                    <button class="action-btn btn-edit" onclick="editStudent(${s.id}, '${s.name}', '${s.dept}', ${s.marks})">Edit</button>
+                    <button class="action-btn btn-delete" onclick="deleteStudent(${s.id})">Delete</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    function resetForm() {
+        form.reset();
+        isEditing = false;
+        editingId = null;
+        formTitle.textContent = "Add New Student";
+        btnText.textContent = "Save Student";
+        cancelBtn.style.display = 'none';
+        formAlert.style.display = 'none';
+    }
+
+    function showAlert(element, type, message) {
+        element.className = `alert alert-${type}`;
+        element.textContent = message;
+        element.style.display = 'block';
+        
+        // Auto hide after 3 seconds
+        setTimeout(() => {
+            element.style.display = 'none';
+        }, 3000);
+    }
+
+    function showLoader(show) {
+        tableLoader.style.display = show ? 'block' : 'none';
+        if (show) emptyState.style.display = 'none';
+    }
+
+</script>
+
+</body>
+</html>

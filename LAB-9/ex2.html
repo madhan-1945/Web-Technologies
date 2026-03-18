@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Object – ES6</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:   #f5f0e8;
+      --white:   #ffffff;
+      --ink:     #1a1a2e;
+      --ink-mid: #3d3d5c;
+      --ink-lt:  #8888aa;
+      --gold:    #c9963a;
+      --gold-lt: #e8b84b;
+      --green:   #2d7a5f;
+      --border:  #e0d8cc;
+      --shadow-lg: 0 8px 48px rgba(26,26,46,0.14);
+    }
+
+    body {
+      background: var(--cream);
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(201,150,58,0.07) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(45,122,95,0.06) 0%, transparent 50%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(20px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+
+    .card-header {
+      background: var(--ink);
+      padding: 32px 36px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 36px; right: 36px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+    .header-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+    .card-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+    }
+    .card-header p {
+      margin-top: 6px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      font-weight: 300;
+    }
+
+    .card-body { padding: 32px 36px; }
+
+    .field { margin-bottom: 18px; }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: var(--ink-lt);
+      margin-bottom: 7px;
+    }
+    .field input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 3px;
+      padding: 11px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: var(--ink);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,150,58,0.12);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0;
+    }
+
+    .btn {
+      width: 100%;
+      background: var(--ink);
+      color: var(--white);
+      border: none;
+      border-radius: 3px;
+      padding: 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn:hover  { background: var(--ink-mid); }
+    .btn:active { transform: scale(0.99); }
+    .btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-lt));
+    }
+
+    .result-block {
+      display: none;
+      margin-top: 22px;
+      animation: fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .result-block.show { display: block; }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .panel-header {
+      background: var(--cream);
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .panel-header .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+    .panel-header .dot.green { background: var(--green); }
+    .panel-header span {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--ink-mid);
+    }
+    .panel-body { padding: 16px 18px; }
+
+    .prop-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .prop-row:last-child { border-bottom: none; }
+    .prop-key {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--ink-lt);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .prop-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+    .prop-row.new-prop .prop-key { color: var(--green); }
+    .prop-row.new-prop .prop-val { color: var(--green); font-size: 16px; font-weight: 600; }
+    .badge-new {
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      background: rgba(45,122,95,0.12);
+      color: var(--green);
+      border: 1px solid rgba(45,122,95,0.25);
+      border-radius: 2px;
+      padding: 2px 7px;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 1px;
+      padding: 14px 36px 20px;
+      background: var(--ink);
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <div class="card-header">
+    <div class="header-tag">ES6 · JavaScript</div>
+    <h1>Student Form</h1>
+    <p>Register Now</p>
+  </div>
+
+  <div class="card-body">
+
+    <div class="two-col">
+      <div class="field">
+        <label>Student ID</label>
+        <input type="number" id="sid" placeholder="ID" />
+      </div>
+      <div class="field">
+        <label>Name</label>
+        <input type="text" id="sname" placeholder="Name" />
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="field">
+        <label>Department</label>
+        <input type="text" id="sdept" placeholder="Department" />
+      </div>
+      <div class="field">
+        <label>Marks</label>
+        <input type="number" id="smarks" min="0" max="100" placeholder="Marks" />
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <button class="btn" onclick="run()">Run Program</button>
+
+    <div class="result-block" id="resultBlock">
+
+      
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="dot green"></div>
+          <span>Student</span>
+        </div>
+        <div class="panel-body" id="spreadPanel"></div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <footer>Apply Now !</footer>
+</div>
+
+<script>
+  const getGrade = (marks) => {
+    if (marks >= 90) return 'A';
+    if (marks >= 80) return 'B';
+    if (marks >= 70) return 'C';
+    if (marks >= 60) return 'D';
+    return 'F';
+  };
+
+  function run() {
+    const student = {
+      id:         parseInt(document.getElementById('sid').value) ,
+      name:       document.getElementById('sname').value.trim() ,
+      department: document.getElementById('sdept').value.trim() ,
+      marks:      parseFloat(document.getElementById('smarks').value)
+    };
+
+    // Object Destructuring
+    const { id, name, department, marks } = student;
+
+    // Spread Operator
+    const updatedStudent = {
+      ...student,
+      grade: getGrade(marks)
+    };
+
+    
+
+    // Step 2 panel
+    document.getElementById('spreadPanel').innerHTML =
+      Object.entries(updatedStudent).map(([key, val]) => {
+        const isNew = key === 'grade';
+        const display = typeof val === 'string' ? `"${val}"` : val;
+        return `<div class="prop-row ${isNew ? 'new-prop' : ''}">
+          <span class="prop-key">${key}${isNew ? '<span class="badge-new">new</span>' : ''}</span>
+          <span class="prop-val">${display}</span>
+        </div>`;
+      }).join('');
+
+    document.getElementById('resultBlock').classList.add('show');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Course Enrollment – ES6</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:     #f5f0e8;
+      --white:     #ffffff;
+      --ink:       #1a1a2e;
+      --ink-mid:   #3d3d5c;
+      --ink-lt:    #8888aa;
+      --gold:      #c9963a;
+      --gold-lt:   #e8b84b;
+      --green:     #2d7a5f;
+      --green-bg:  rgba(45,122,95,0.08);
+      --green-br:  rgba(45,122,95,0.25);
+      --red:       #b84040;
+      --red-bg:    rgba(184,64,64,0.08);
+      --red-br:    rgba(184,64,64,0.25);
+      --border:    #e0d8cc;
+      --shadow-lg: 0 8px 48px rgba(26,26,46,0.14);
+    }
+
+    body {
+      background: var(--cream);
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(201,150,58,0.07) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(45,122,95,0.06) 0%, transparent 50%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(20px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+
+    /* Header */
+    .card-header {
+      background: var(--ink);
+      padding: 32px 36px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 36px; right: 36px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+    .header-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+    .card-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+    }
+    .card-header p {
+      margin-top: 6px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      font-weight: 300;
+    }
+
+    /* Body */
+    .card-body { padding: 32px 36px; }
+
+    .field { margin-bottom: 18px; }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: var(--ink-lt);
+      margin-bottom: 7px;
+    }
+    .field input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 3px;
+      padding: 11px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: var(--ink);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,150,58,0.12);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    /* Seats toggle */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1.5px solid var(--border);
+      border-radius: 3px;
+      padding: 11px 14px;
+      margin-bottom: 18px;
+    }
+    .toggle-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-mid);
+    }
+    .toggle-label span {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--ink-lt);
+      margin-left: 8px;
+    }
+    .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; inset: 0;
+      background: var(--red);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .slider::before {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      left: 3px; top: 3px;
+      background: var(--white);
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+    .switch input:checked + .slider { background: var(--green); }
+    .switch input:checked + .slider::before { transform: translateX(20px); }
+
+    .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+    .btn {
+      width: 100%;
+      background: var(--ink);
+      color: var(--white);
+      border: none;
+      border-radius: 3px;
+      padding: 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn:hover  { background: var(--ink-mid); }
+    .btn:active { transform: scale(0.99); }
+    .btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-lt));
+    }
+
+    /* Result */
+    .result-block {
+      display: none;
+      margin-top: 22px;
+      animation: fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .result-block.show { display: block; }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .panel:last-child { margin-bottom: 0; }
+    .panel-header {
+      background: var(--cream);
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .panel-header .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+    .panel-header .dot.green { background: var(--green); }
+    .panel-header .dot.red   { background: var(--red); }
+    .panel-header span {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--ink-mid);
+    }
+    .panel-body { padding: 16px 18px; }
+
+    .prop-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .prop-row:last-child { border-bottom: none; }
+    .prop-key {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--ink-lt);
+    }
+    .prop-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    /* Promise result banner */
+    .promise-banner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 18px;
+    }
+    .promise-icon {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .promise-icon.success { background: var(--green-bg); border: 1px solid var(--green-br); }
+    .promise-icon.fail    { background: var(--red-bg);   border: 1px solid var(--red-br); }
+    .promise-text .status {
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .promise-text .status.success { color: var(--green); }
+    .promise-text .status.fail    { color: var(--red); }
+    .promise-text .sub {
+      font-size: 12px;
+      color: var(--ink-lt);
+      margin-top: 2px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 1px;
+      padding: 14px 36px 20px;
+      background: var(--ink);
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <div class="card-header">
+    <div class="header-tag">ES6 · JavaScript</div>
+    <h1>Course Enrollment<br/>System</h1>
+    <p>Register Now</p>
+  </div>
+
+  <div class="card-body">
+
+    <div class="two-col">
+      <div class="field">
+        <label>Course Name</label>
+        <input type="text" id="courseName" placeholder="ID" />
+      </div>
+      <div class="field">
+        <label>Instructor</label>
+        <input type="text" id="instructor" placeholder="Name" />
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="field">
+        <label>Total Seats</label>
+        <input type="number" id="totalSeats" min="1" />
+      </div>
+      <div class="field">
+        <label>Enrolled</label>
+        <input type="number" id="enrolled" min="0" />
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <div class="toggle-label">
+        Seats Available
+        <span id="toggleHint">toggle to override</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="seatsToggle" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="divider"></div>
+
+    <button class="btn" onclick="run()">Enroll Now</button>
+
+    <div class="result-block" id="resultBlock">
+
+      <!-- Course Details (class method) -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="dot"></div>
+          <span>Course Details</span>
+        </div>
+        <div class="panel-body">
+          <div class="prop-row">
+            <span class="prop-key">Course Name</span>
+            <span class="prop-val" id="resCourse">—</span>
+          </div>
+          <div class="prop-row">
+            <span class="prop-key">Instructor</span>
+            <span class="prop-val" id="resInstructor">—</span>
+          </div>
+          <div class="prop-row">
+            <span class="prop-key">Seats</span>
+            <span class="prop-val" id="resSeats">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Promise result -->
+      <div class="panel" id="promisePanel">
+        <div class="panel-header">
+          <div class="dot" id="promiseDot"></div>
+          <span>enrollCourse · Promise Result</span>
+        </div>
+        <div class="promise-banner" id="promiseBanner"></div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <footer>Check Now</footer>
+</div>
+
+<script>
+  // ES6 Class
+  class Course {
+    constructor(courseName, instructor, totalSeats, enrolled) {
+      this.courseName  = courseName;
+      this.instructor  = instructor;
+      this.totalSeats  = totalSeats;
+      this.enrolled    = enrolled;
+    }
+
+    displayCourse() {
+      return `Course: ${this.courseName}, Instructor: ${this.instructor}`;
+    }
+  }
+
+  function run() {
+    const courseName  = document.getElementById('courseName').value.trim() ;
+    const instructor  = document.getElementById('instructor').value.trim() ;
+    const totalSeats  = parseInt(document.getElementById('totalSeats').value) ;
+    const enrolled    = parseInt(document.getElementById('enrolled').value) ;
+    const seatsAvailable = document.getElementById('seatsToggle').checked;
+
+    // Instantiate ES6 class
+    const course1 = new Course(courseName, instructor, totalSeats, enrolled);
+
+    // Display course details
+    document.getElementById('resCourse').textContent    = `"${course1.courseName}"`;
+    document.getElementById('resInstructor').textContent = `"${course1.instructor}"`;
+    document.getElementById('resSeats').textContent     = `${enrolled} / ${totalSeats}`;
+
+    // Promise
+    const enrollCourse = new Promise((resolve, reject) => {
+      if (seatsAvailable)
+        resolve('Enrollment Successful');
+      else
+        reject('Course Full');
+    });
+
+    enrollCourse
+      .then(msg => {
+        document.getElementById('promiseDot').className = 'dot green';
+        document.getElementById('promiseBanner').innerHTML = `
+          <div class="promise-icon success">✓</div>
+          <div class="promise-text">
+            <div class="status success">${msg}</div>
+            
+          </div>`;
+      })
+      .catch(err => {
+        document.getElementById('promiseDot').className = 'dot red';
+        document.getElementById('promiseBanner').innerHTML = `
+          <div class="promise-icon fail">✕</div>
+          <div class="promise-text">
+            <div class="status fail">${err}</div>
+            
+          </div>`;
+      });
+
+    document.getElementById('resultBlock').classList.add('show');
+  }
+</script>
+</body>
+</html>

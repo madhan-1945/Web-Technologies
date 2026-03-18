@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Marks Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:   #f5f0e8;
+      --white:   #ffffff;
+      --ink:     #1a1a2e;
+      --ink-mid: #3d3d5c;
+      --ink-lt:  #8888aa;
+      --gold:    #c9963a;
+      --gold-lt: #e8b84b;
+      --green:   #2d7a5f;
+      --red:     #b84040;
+      --border:  #e0d8cc;
+      --shadow:  0 2px 24px rgba(26,26,46,0.10);
+      --shadow-lg: 0 8px 48px rgba(26,26,46,0.14);
+    }
+
+    body {
+      background: var(--cream);
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(201,150,58,0.07) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(45,122,95,0.06) 0%, transparent 50%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(20px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+
+    /* Header */
+    .card-header {
+      background: var(--ink);
+      padding: 32px 36px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 36px; right: 36px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+    .header-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+    .card-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+    }
+    .card-header p {
+      margin-top: 6px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      font-weight: 300;
+    }
+
+    /* Body */
+    .card-body { padding: 32px 36px; }
+
+    .field { margin-bottom: 20px; }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: var(--ink-lt);
+      margin-bottom: 7px;
+    }
+    .field input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 3px;
+      padding: 11px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: var(--ink);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,150,58,0.12);
+    }
+
+    .marks-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .mark-box label {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: var(--ink-lt);
+      margin-bottom: 7px;
+    }
+    .mark-box input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 3px;
+      padding: 11px 10px;
+      font-family: 'DM Mono', monospace;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--ink);
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .mark-box input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,150,58,0.12);
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0;
+    }
+
+    .btn {
+      width: 100%;
+      background: var(--ink);
+      color: var(--white);
+      border: none;
+      border-radius: 3px;
+      padding: 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn:hover  { background: var(--ink-mid); }
+    .btn:active { transform: scale(0.99); }
+    .btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-lt));
+    }
+
+    /* Result */
+    .result {
+      display: none;
+      margin-top: 24px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      animation: fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .result.show { display: block; }
+
+    .result-header {
+      background: var(--cream);
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .result-header .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+    .result-header span {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--ink-mid);
+    }
+
+    .result-body { padding: 18px; }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .result-row:last-child { border-bottom: none; }
+    .result-row .r-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--ink-lt);
+    }
+    .result-row .r-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+    .result-row.highlight .r-value {
+      color: var(--gold);
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .result-row .r-value.pass  { color: var(--green); }
+    .result-row .r-value.fail  { color: var(--red); }
+
+    /* Console */
+    .console {
+      margin-top: 24px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      display: none;
+      animation: fadeUp 0.5s 0.1s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .console.show { display: block; }
+    .console-bar {
+      background: #1e1e2e;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .console-bar .c-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .console-bar span {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      margin-left: 8px;
+    }
+    .console-out {
+      background: #13131f;
+      padding: 16px 18px;
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      line-height: 2;
+    }
+    .c-line { display: block; }
+    .c-prompt { color: #6af7c2; margin-right: 6px; }
+    .c-key    { color: #7c9cf7; }
+    .c-str    { color: #f7c46a; }
+    .c-num    { color: #f76a8c; }
+    .c-comment{ color: rgba(255,255,255,0.25); }
+    .c-out    { color: rgba(255,255,255,0.75); }
+
+    footer {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 1px;
+      padding: 0 36px 20px;
+      background: var(--ink);
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <div class="card-header">
+    <div class="header-tag">ES6 · JavaScript</div>
+    <h1>Student Marks<br/>Calculator</h1>
+    <p>check now</p>
+  </div>
+
+  <div class="card-body">
+
+    <div class="field">
+      <label>Student Name</label>
+      <input type="text" id="studentName" placeholder="Enter student name" />
+    </div>
+
+    <div class="marks-row">
+      <div class="mark-box">
+        <label>Mark 1</label>
+        <input type="number" id="mark1" min="0" max="100" />
+      </div>
+      <div class="mark-box">
+        <label>Mark 2</label>
+        <input type="number" id="mark2" min="0" max="100" />
+      </div>
+      <div class="mark-box">
+        <label>Mark 3</label>
+        <input type="number" id="mark3" min="0" max="100" />
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <button class="btn" onclick="calculate()">Calculate Results</button>
+
+    <!-- Result Panel -->
+    <div class="result" id="result">
+      <div class="result-header">
+        <div class="dot"></div>
+        <span>Output</span>
+      </div>
+      <div class="result-body">
+        <div class="result-row">
+          <span class="r-label">Student Name</span>
+          <span class="r-value" id="resName">—</span>
+        </div>
+        <div class="result-row">
+          <span class="r-label">Total Marks</span>
+          <span class="r-value" id="resTotal">—</span>
+        </div>
+        <div class="result-row highlight">
+          <span class="r-label">Average Marks</span>
+          <span class="r-value" id="resAvg">—</span>
+        </div>
+        <div class="result-row">
+          <span class="r-label">Status</span>
+          <span class="r-value" id="resStatus">—</span>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+
+  <footer>Calculates Marks</footer>
+</div>
+
+<script>
+  // ES6: const + arrow function
+  const calculateAverage = (m1, m2, m3) => {
+    return (m1 + m2 + m3) / 3;
+  };
+
+  function calculate() {
+    // ES6: let
+    let studentName = document.getElementById('studentName').value.trim();
+    let mark1 = parseFloat(document.getElementById('mark1').value);
+    let mark2 = parseFloat(document.getElementById('mark2').value);
+    let mark3 = parseFloat(document.getElementById('mark3').value);
+
+    if (!studentName) { alert('Please enter a student name.'); return; }
+
+    let total   = mark1 + mark2 + mark3;
+    let average = calculateAverage(mark1, mark2, mark3);
+    let status  = average >= 50 ? 'PASS' : 'FAIL';
+
+    // Update result panel
+    document.getElementById('resName').textContent   = studentName;
+    document.getElementById('resTotal').textContent  = `${total} / 300`;
+    document.getElementById('resAvg').textContent    = average.toFixed(2);
+
+    const statusEl = document.getElementById('resStatus');
+    statusEl.textContent  = status;
+    statusEl.className    = 'r-value ' + (status === 'PASS' ? 'pass' : 'fail');
+
+    document.getElementById('result').classList.add('show');
+
+    
+
+    document.getElementById('consoleOut').innerHTML = lines.join('');
+    document.getElementById('consoleBox').classList.add('show');
+  }
+</script>
+</body>
+</html>

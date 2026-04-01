@@ -1,0 +1,36 @@
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:#f4f6f8;
+  display:flex;
+  justify-content:center;
+  padding-top:40px;
+}
+
+.container{
+  width:600px;
+  background:white;
+  padding:30px;
+  border-radius:8px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+.list{
+  list-style:none;
+  padding:0;
+}
+
+.list li{
+  margin-bottom:15px;
+  padding:12px;
+  background:#ecf0f1;
+  border-radius:5px;
+}
+
+.loading{
+  color:#2980b9;
+}
+
+.error{
+  color:red;
+}

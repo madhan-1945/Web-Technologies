@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>REST API Demo</title>
+<style>
+body{
+font-family: Arial;
+margin:40px;
+}
+button{
+margin:5px;
+padding:6px;
+}
+input{
+margin:5px;
+padding:5px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>User Management (REST API)</h2>
+
+<h3>Add User</h3>
+<input id="id" placeholder="ID">
+<input id="name" placeholder="Name">
+<input id="age" placeholder="Age">
+<button onclick="addUser()">Add</button>
+
+<h3>Update User</h3>
+<input id="uid" placeholder="User ID">
+<input id="uname" placeholder="New Name">
+<input id="uage" placeholder="New Age">
+<button onclick="updateUser()">Update</button>
+
+<h3>Delete User</h3>
+<input id="did" placeholder="User ID">
+<button onclick="deleteUser()">Delete</button>
+
+<h3>Users List</h3>
+<button onclick="getUsers()">Load Users</button>
+
+<pre id="output"></pre>
+
+<script>
+
+async function getUsers(){
+let res = await fetch("/users");
+let data = await res.json();
+document.getElementById("output").textContent =
+JSON.stringify(data,null,2);
+}
+
+async function addUser(){
+
+let id=document.getElementById("id").value;
+let name=document.getElementById("name").value;
+let age=document.getElementById("age").value;
+
+await fetch("/users",{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({id:Number(id),name,age:Number(age)})
+});
+
+getUsers();
+}
+
+async function updateUser(){
+
+let id=document.getElementById("uid").value;
+let name=document.getElementById("uname").value;
+let age=document.getElementById("uage").value;
+
+await fetch("/users/"+id,{
+method:"PUT",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({name,age})
+});
+
+getUsers();
+}
+
+async function deleteUser(){
+
+let id=document.getElementById("did").value;
+
+await fetch("/users/"+id,{
+method:"DELETE"
+});
+
+getUsers();
+}
+
+</script>
+
+</body>
+</html>

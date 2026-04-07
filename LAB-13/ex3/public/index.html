@@ -1,0 +1,105 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>MongoDB CRUD Demo</title>
+<style>
+body{font-family:Arial;margin:40px;}
+input{margin:5px;padding:6px;}
+button{padding:6px;margin:5px;}
+table{border-collapse:collapse;margin-top:20px;}
+td,th{border:1px solid #ccc;padding:8px;}
+</style>
+</head>
+
+<body>
+
+<h2>MongoDB CRUD Operations</h2>
+
+<h3>Add User</h3>
+<input id="name" placeholder="Name">
+<input id="age" placeholder="Age">
+<button onclick="addUser()">Add</button>
+
+<h3>Users</h3>
+<button onclick="loadUsers()">Refresh List</button>
+
+<table id="table">
+<thead>
+<tr>
+<th>Name</th>
+<th>Age</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<script>
+
+async function loadUsers(){
+    const res = await fetch("/api/users");
+    const data = await res.json();
+
+    const tbody=document.querySelector("tbody");
+    tbody.innerHTML="";
+
+    data.forEach(u=>{
+        const row=`
+        <tr>
+        <td>${u.name}</td>
+        <td>${u.age}</td>
+        <td>
+        <button onclick="deleteUser('${u._id}')">Delete</button>
+        <button onclick="updateUser('${u._id}')">Update</button>
+        </td>
+        </tr>
+        `;
+
+        tbody.innerHTML+=row;
+    });
+}
+
+async function addUser(){
+
+    const name=document.getElementById("name").value;
+    const age=document.getElementById("age").value;
+
+    await fetch("/api/users",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({name,age})
+    });
+
+    loadUsers();
+}
+
+async function deleteUser(id){
+
+    await fetch("/api/users/"+id,{
+        method:"DELETE"
+    });
+
+    loadUsers();
+}
+
+async function updateUser(id){
+
+    const name=prompt("Enter new name");
+    const age=prompt("Enter new age");
+
+    await fetch("/api/users/"+id,{
+        method:"PUT",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({name,age})
+    });
+
+    loadUsers();
+}
+
+loadUsers();
+
+</script>
+
+</body>
+</html>

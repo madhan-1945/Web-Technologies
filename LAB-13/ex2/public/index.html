@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Middleware Demo</title>
+<style>
+body{font-family:Arial;margin:40px;}
+button{padding:8px;margin:5px;}
+pre{background:#f4f4f4;padding:10px;}
+</style>
+</head>
+
+<body>
+
+<h2>Express Middleware Demonstration</h2>
+
+<p>This page sends requests to the Node.js server so you can see middleware execution in the console.</p>
+
+<button onclick="sendGet()">Send GET Request</button>
+<button onclick="sendPost()">Send POST Request</button>
+
+<h3>Response</h3>
+<pre id="output"></pre>
+
+<script>
+
+async function sendGet(){
+    const res = await fetch("/api/test");
+    const data = await res.json();
+    document.getElementById("output").textContent =
+        JSON.stringify(data,null,2);
+}
+
+async function sendPost(){
+    const res = await fetch("/api/test",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({name:"Student",course:"Web Tech"})
+    });
+
+    const data = await res.json();
+
+    document.getElementById("output").textContent =
+        JSON.stringify(data,null,2);
+}
+
+</script>
+
+</body>
+</html>
